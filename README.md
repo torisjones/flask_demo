@@ -18,6 +18,7 @@ and go to `http://localhost:5000`. You should see the text `Hello World!` displa
 
 On linux/Mac os this looks like 
 ```bash
+pip3 install -r requirements.txt
 cd HelloWorld/basic/
 python3 server.py
 ```
