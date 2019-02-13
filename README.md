@@ -6,6 +6,38 @@ framework and the development of RESTful web servers.
 
 
 ### Setup
+
+#### Install Python (Mac)
+
+Confirm your Python version by running the following command in terminal:
+
+```python --version```
+
+If it is version 3.6+, move on to 'Basic Setup'. If not, check to see if you have homebrew installed with:
+
+```$ brew doctor``` 
+
+```Your system is ready to brew.```
+
+If you do not have homebrew installed, get it. It's a lifesaver. Homebrew depends on Apple’s Xcode package, so run the following command to install Xcode first:
+
+```$ xcode-select --install```
+
+Click through all the confirmation commands (Xcode is a large program so this might take a while to install depending on your internet connection).
+
+Next, install Homebrew:
+
+```/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"```
+
+Once you have homebrew, run the following command to install the latest python version
+
+```brew install python3```
+
+#### Install Python (Windows)
+
+Download python 3.7 at https://www.python.org/downloads/windows/
+
+#### Basic Setup
 To get this project running, you will need to have installed python (preferably python 3.6+) and
 a text editor. 
 
