@@ -13,7 +13,7 @@ Confirm your Python version by running the following command in terminal:
 
 ```python --version```
 
-If it is version 3.6+, move on to 'Basic Setup'. If not, check to see if you have homebrew installed with:
+If it is version 3.6+, move on to 'Hello World Application'. If not, check to see if you have homebrew installed with:
 
 ```$ brew doctor``` 
 
@@ -37,7 +37,8 @@ Once you have homebrew, run the following command to install the latest python v
 
 Download python 3.7 at https://www.python.org/downloads/windows/
 
-#### Basic Setup
+## Hello World Application
+
 To get this project running, you will need to have installed python (preferably python 3.6+) and
 a text editor. 
 
@@ -54,9 +55,6 @@ pip3 install -r requirements.txt
 cd HelloWorld/basic/
 python3 server.py
 ```
-
-
-## Hello World Application
 
 ## Basic Front End
 
