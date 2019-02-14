@@ -63,5 +63,6 @@ To run you will need npm to install npm (https://www.npmjs.com/get-npm).
 1. Navigate to /BasicFront
 2. Run `npm install`
 3. Run `npm run start`
+4. Project should open a new window for you, if it does not, open a tab and go to `http://localhost:8050/`
 
 ## Account Management
