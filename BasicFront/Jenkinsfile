@@ -1,0 +1,139 @@
+
+    def version  = params?.version
+    def env_vars = ["PATH+NODE=/opt/runtime/node-v8.9.0-linux-x64/bin/"]
+    
+    //For questions related to this JenkinsFile , refer : https://github.kdc.capitalone.com/pages/revup/origami/
+    branches {
+        snapshotBranch = 'dev'
+        releaseBranch = 'master'
+        hotfixBranch = 'hotfix'
+    }
+    integration {
+        pullRequest {
+            //npm {
+            //    command = 'install'
+            //    stageName = 'Production dependencies '
+            //}
+            //npm {
+            //    command = 'run lint'
+            //    stageName = 'Add linting to the project'
+            //}
+            //npm {
+            //    command = 'run test:coverage '
+            //    stageName = 'Running tests'
+            //}
+        }
+    
+        snapshot {
+            npm {
+                command = 'install --production'
+                stageName = 'Installing Production dependencies'
+            }
+            eratocode {
+                stageName = 'run eratocode scan'
+            }
+            npm {
+                stageName = 'install'
+            }
+            version = npm {
+                command = 'run build'
+                stageName = 'run build'
+            }
+            
+            // npmTestHeadless {
+            //         stageName = "run headless tests"
+            //         scriptName = 'test:jenkins'
+            //         nodejsHome = '/opt/runtime/node-v8.9.0-linux-x64/bin/'
+            // }
+            // withEnv(env_vars) {
+            //     sonar {
+            //         skip = false
+            //         stageName = 'Sonarqube Scan'
+            //         appVersion = version
+            //         withMaven = false
+            //         inclusions = ['dist/pages/*.js','dist/widgets/*.js']
+            //         exclusions = []
+            //         profile = '"Sonar way"'
+            //         sonarUrl = 'https://sonar-community.cloud.capitalone.com/'
+            //         sonarRunnerArgs = [
+            //             '-Dsonar.language=js',
+            //             '-Dsonar.sources=src',
+            //             '-X',
+            //             '-Dsonar.javascript.lcov.reportPath=coverage/lcov.info',
+            //             '-Dsonar.javascript.lcov.itReportPath=coverage/lcov.info'
+            //         ]
+            //     }
+            // }
+            npm {
+                command = 'run release -- --prerelease'
+                stageName = 'run release'
+            }
+            gitPush {
+                gitPushArgs = ['--follow-tags']
+                message = 'push of release'
+            }
+            npm {
+                command = 'publish'
+                stageName = 'publish'
+            }
+        }
+        release {
+            //installing only prod dependencies first to make sure clm scan happens on the dependencies those are going to be pushed in production
+            npm {
+                command = 'install --production'
+                stageName = 'Installing Production dependencies'
+            }
+            eratocode {
+                 stageName = 'run eratocode scan'
+             }
+                npm {
+                    stageName = 'install'
+                }
+                version = npm {
+                    command = 'run build'
+                    stageName = 'run build'
+                }
+                npmTestHeadless {
+                    stageName = "run headless tests"
+                    scriptName = 'test:jenkins'
+                    nodejsHome = '/opt/runtime/node-v8.9.0-linux-x64/bin/'
+                }
+            withEnv(env_vars) {
+                sonar {
+                    skip = false
+                    stageName = 'Sonarqube Scan'
+                    appVersion = version
+                    withMaven = false
+                    inclusions = ['dist/pages/*.js','dist/widgets/*.js']
+                    exclusions = []
+                    profile = '"Sonar way"'
+                    sonarUrl = 'https://sonar-community.cloud.capitalone.com/'
+                    sonarRunnerArgs = [
+                        '-Dsonar.language=js',
+                        '-Dsonar.sources=src',
+                        '-X',
+                        '-Dsonar.javascript.lcov.reportPath=coverage/lcov.info',
+                        '-Dsonar.javascript.lcov.itReportPath=coverage/lcov.info'
+                        ]
+                }
+            }
+            npm {
+                command = 'run release -- --prerelease'
+                stageName = 'run release'
+            }
+            npm {
+                command = 'run release -- --release-as patch'
+                stageName = 'run release -- --release-as patch'
+            }
+            gitPush {
+               gitPushArgs = ['--follow-tags']
+               message = 'push of release'
+            }
+            npm {
+                command = 'publish'
+                stageName = 'publish'
+            }
+    
+        }
+    }
+    
