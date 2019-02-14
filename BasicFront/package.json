@@ -4,7 +4,6 @@
   "description": "",
   "main": "init-script.js",
   "scripts": {
-    
     "build": "rollup -c --environment BUILD:dev",
     "build:prod": "rollup -c --environment BUILD:prod",
     "cc": "node scripts/createComponent.js",
@@ -20,7 +19,6 @@
     "ugly": "uglifyjs ./dist/flask-demo-ui.js -o ./dist/flask-demo-ui.min.js --source-map ",
     "watchStyle": "watch 'npm run build' src/",
     "lint": "eslint src"
-    
   },
   "author": "",
   "license": "ISC",
