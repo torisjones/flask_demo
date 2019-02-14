@@ -2,7 +2,9 @@
 
 Flask is a popular open source package for python that makes developing
 web applications quick and simple. This tutorial is an introduction to the
-framework and the development of RESTful web servers. 
+framework and the development of RESTful web servers. We will be integrating
+with Capital One's Nessie Api to serve our mock data. More information on 
+Nessie can be found at http://api.reimaginebanking.com/
 
 
 ### Setup
