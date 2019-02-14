@@ -60,7 +60,7 @@ python3 server.py
 
 ## Basic Front End
 
-To run you will need npm to install npm (https://www.npmjs.com/get-npm).
+To run you will need npm. To install npm go to (https://www.npmjs.com/get-npm).
 
 1. Navigate to /BasicFront
 2. Run `npm install`
