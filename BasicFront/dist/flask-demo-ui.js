@@ -158,14 +158,18 @@ class FlaskDemoRoute extends HTMLElement {
   createCustomerCall(event){
     console.log('inside create customer on route');
     console.log(event.detail);
-    // TODO: actually make call to flask app
     if(event.detail._id){
-      //TODO make put call
       console.log('inside make put call');
-      // this.api.putCall()
+      this.api.putCall(`/customers/${event.detail.id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,event.detail.address).catch((error)=>{
+        console.log(error);
+      });
     } else {
-      //TODO make post call
       console.log('inside make post call');
+      this.api.postCall('/customers?key=6122e0b7dd9cf10ce7cb1135ac481e90',event.detail).then(()=>{
+        this.__getCustomers();
+      }).catch((error)=>{
+        console.log(error);
+      });
     }
     this.loadHomePage();
   }
