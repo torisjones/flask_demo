@@ -5,8 +5,9 @@ class ManageCustomers extends HTMLElement {
   }
   connectedCallback(){
     this._shadowRoot.innerHTML = tempHtml;
-    this.backButton = this._shadowRoot.querySelector('#back');
+    // this.backButton = this._shadowRoot.querySelector('#back');
     this.customerDiv = this._shadowRoot.querySelector('#customerDiv');
+    this.createCustomerButton = this._shadowRoot.querySelector('#newCustomer');
     this.__addEventListeners();
   }
   disconnectedCallback(){
@@ -19,7 +20,8 @@ class ManageCustomers extends HTMLElement {
 
   }
   __addEventListeners(){
-    this.backButton.addEventListener('click',this.back.bind(this));
+    this.createCustomerButton.addEventListener('click',this.__createCustomer.bind(this));
+    // this.backButton.addEventListener('click',this.back.bind(this));
   }
   get customers(){
     return this._customers;
@@ -31,28 +33,6 @@ class ManageCustomers extends HTMLElement {
     }
   }
   __buildCustomers(){
-    // this.customers = [{
-    //   first_name: 'Tori',
-    //   last_name: 'Jones',
-    //   address: {
-    //     street_name: 'Whitestone ln',
-    //     street_number: '5000',
-    //     city: 'Plano',
-    //     state: 'TX',
-    //     zip: '75024'
-    //   }
-    // },
-    //   {
-    //     first_name: 'Kelcy',
-    //     last_name: 'Jones',
-    //     address: {
-    //       street_name: 'Whitestone ln',
-    //       street_number: '5000',
-    //       city: 'Plano',
-    //       state: 'TX',
-    //       zip: '75024'
-    //     }
-    //   }];
     this.customers.forEach((customer)=>{
       let customerContainer = document.createElement('div');
       customerContainer.setAttribute('class','container');
@@ -72,6 +52,9 @@ class ManageCustomers extends HTMLElement {
   }
   back(){
     this.dispatchEvent(new CustomEvent('back'));
+  }
+  __createCustomer(){
+    this.__emitUpdateEvent({type:'create'});
   }
   __editCustomer(event){
     let id = event.currentTarget.getAttribute('id');
