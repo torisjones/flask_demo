@@ -397,18 +397,13 @@ class ManageCustomers extends HTMLElement {
     });
   }
   back(){
-    console.log('back');
     this.dispatchEvent(new CustomEvent('back'));
   }
   __editCustomer(event){
-    console.log('inside edit customer');
-    console.log(event.currentTarget.getAttribute('id'));
     let id = event.currentTarget.getAttribute('id');
     this.__emitUpdateEvent({type:'edit',id:id});
   }
   __customerAccounts(event){
-    console.log('inside accounts');
-    console.log(event.currentTarget.getAttribute('id'));
     let id = event.currentTarget.getAttribute('id');
     this.__emitUpdateEvent({type:'accounts',id:id});
   }
@@ -502,7 +497,6 @@ class CustomerAccountsPage extends HTMLElement {
         body[input.getAttribute('id')] = input.value :
         body[input.getAttribute('id')] = parseInt(input.value);
     });
-    console.log(body);
     this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'create',custId:this.customerId,body:body}}));
     this.__clearData();
   }

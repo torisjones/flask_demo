@@ -79,7 +79,6 @@ class CustomerAccountsPage extends HTMLElement {
         body[input.getAttribute('id')] = input.value :
         body[input.getAttribute('id')] = parseInt(input.value);
     });
-    console.log(body);
     this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'create',custId:this.customerId,body:body}}));
     this.__clearData();
   }
