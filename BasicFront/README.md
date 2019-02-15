@@ -1,16 +1,4 @@
 
-![](logo.png)
-# Flask-demo-ui Web Components
-Common Web Components for the FS org.
-
-- [Start Up](#startup)
-- [Commands](#commands)
-- [Deploy](#deploy)
-- [Polyfill](#polyfill)
-- [Code Structure](#structure)
-- [Angular Usage](#angular)
-- [Bower Usage](#bower)
-- [Commit Message Guidelines](#commit)
 
 ## <a name="startup"></a>StartUp
 Clone the code from this repo to your own github repo. After you get the code please run the following code to get the npm dependances.
