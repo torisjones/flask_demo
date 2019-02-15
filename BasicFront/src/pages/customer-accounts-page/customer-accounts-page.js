@@ -1,0 +1,66 @@
+class CustomerAccountsPage extends HTMLElement {
+  constructor(){
+    super();
+    this._shadowRoot = this.attachShadow({mode: 'open'});
+  }
+  connectedCallback(){
+    this._shadowRoot.innerHTML = tempHtml;
+    this.backButton = this._shadowRoot.querySelector('#back');
+    this.accountsDiv = this._shadowRoot.querySelector('#accounts');
+    this.customerButton = this._shadowRoot.querySelector('#customers');
+    this.__addEventListeners();
+  }
+  disconnectedCallback(){
+
+  }
+  attributeChangedCallback(){
+
+  }
+  adoptedCallback(){
+
+  }
+  __addEventListeners(){
+    this.backButton.addEventListener('click',this.back.bind(this));
+    this.customerButton.addEventListener('click',this.manageCustomers.bind(this));
+  }
+  get accounts() {
+    return this._accounts;
+  }
+  set accounts(_value){
+    this._accounts = _value;
+    this.loadData();
+  }
+  loadData(){
+    this.accounts.forEach((account)=>{
+      let accountContainer = document.createElement('div');
+      accountContainer.setAttribute('class','container');
+      accountContainer.innerHTML = `<div class="horizontal-div"><div class="label">Nickname:</div>
+        <div class='name'><input data="${account._id}" value="${account.nickname}" /></div></div>
+        <div class="horizontal-div"><div class="label">Type:</div><div class="type">${account.type}</div></div>
+        <div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards">${account.rewards}</div></div>
+        <div class="horizontal-div"><div class="label">Balance:</div><div class="balance">${account.balance}</div></div>
+        <button id="${account._id}" class="save-button">Update Account Name</button>`;
+      this.accountsDiv.appendChild(accountContainer);
+    });
+    this.accountsDiv.querySelectorAll('.save-button').forEach((button)=>{
+      button.addEventListener('click',this.__emitUpdateEvent.bind(this));
+    });
+    if(this.accounts.length === 0){
+      this.accountsDiv.innerHTML = 'No accounts yet.';
+    }
+  }
+  back(){
+    this.dispatchEvent(new CustomEvent('back'));
+  }
+  manageCustomers(){
+    this.dispatchEvent(new CustomEvent('customers'));
+  }
+  __emitUpdateEvent(event){
+    let id = event.currentTarget.getAttribute('id');
+    let nickname = this.accountsDiv.querySelector(`input[data="${id}"]`).value;
+    this.dispatchEvent(new CustomEvent('update-account',{detail:{id:id, nickname:nickname}}));
+  }
+}
+if(!customElements.get('customer-accounts-page')){
+  customElements.define('customer-accounts-page', CustomerAccountsPage);
+}

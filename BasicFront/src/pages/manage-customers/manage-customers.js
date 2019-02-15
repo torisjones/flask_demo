@@ -6,7 +6,6 @@ class ManageCustomers extends HTMLElement {
   connectedCallback(){
     this._shadowRoot.innerHTML = tempHtml;
     this.backButton = this._shadowRoot.querySelector('#back');
-    this.deleteButton = this._shadowRoot.querySelector('#delete');
     this.customerDiv = this._shadowRoot.querySelector('#customerDiv');
     this.__addEventListeners();
   }
@@ -36,27 +35,32 @@ class ManageCustomers extends HTMLElement {
       customerContainer.innerHTML = `<div class='name'>${customer.first_name} ${customer.last_name}</div>
         <div class="addressLine1">${customer.address.street_number} ${customer.address.street_name}</div>
         <div class="addressLine2">${customer.address.city}, ${customer.address.state} ${customer.address.zip}</div>
-        <button id="${customer._id}" class="edit-button">Edit Customer Details</button>`;
+        <button id="${customer._id}" class="edit-button">Edit Customer Details</button>
+        <button id="${customer._id}" class="accounts">View Customer Accounts</button>`;
       this.customerDiv.appendChild(customerContainer);
     });
     this.customerDiv.querySelectorAll('.edit-button').forEach((button)=>{
       button.addEventListener('click',this.__editCustomer.bind(this));
     });
+    this.customerDiv.querySelectorAll('.accounts').forEach((button)=>{
+      button.addEventListener('click',this.__customerAccounts.bind(this));
+    });
   }
-
   back(){
     console.log('back');
     this.dispatchEvent(new CustomEvent('back'));
-  }
-  __deleteCustomer(event){
-    console.log('inside delete customer');
-    console.log(event.currentTarget.getAttribute('id'));
   }
   __editCustomer(event){
     console.log('inside edit customer');
     console.log(event.currentTarget.getAttribute('id'));
     let id = event.currentTarget.getAttribute('id');
     this.__emitUpdateEvent({type:'edit',id:id});
+  }
+  __customerAccounts(event){
+    console.log('inside accounts');
+    console.log(event.currentTarget.getAttribute('id'));
+    let id = event.currentTarget.getAttribute('id');
+    this.__emitUpdateEvent({type:'accounts',id:id});
   }
   __emitUpdateEvent(event){
     this.dispatchEvent(new CustomEvent('manage-customers',{detail:event}));

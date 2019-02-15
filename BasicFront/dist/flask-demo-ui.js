@@ -144,8 +144,6 @@ class FlaskDemoRoute extends HTMLElement {
   }
   __getCustomers(){
     this.api.getCall('/customers?key=6122e0b7dd9cf10ce7cb1135ac481e90').then((data)=>{
-      console.log('customers');
-      console.log(data);
       this.customerList = data;
     }).catch((error)=>{
       console.log(error);
@@ -186,17 +184,36 @@ class FlaskDemoRoute extends HTMLElement {
         this.__editCustomer(event.detail.id);
         break;
       case 'accounts':
+        this.__getAccounts(event.detail.id);
         break;
     }
     this.loadHomePage();
   }
   __editCustomer(id) {
     this.api.getCall(`/customers/${id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then((data)=>{
-      console.log('data');
-      console.log(data);
       this.__createCustomer(data);
     }).catch((error)=>{
       console.log(error);
+    });
+  }
+  __getAccounts(id) {
+    this.api.getCall(`/customers/${id}/accounts?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then((data)=>{
+      this.__viewAccounts(data);
+    }).catch((error)=>{
+      console.log(error);
+    });
+  }
+  __viewAccounts(accounts){
+    this.pageDiv.innerHTML = '<customer-accounts-page></customer-accounts-page>';
+    this.pageDiv.querySelector('customer-accounts-page').accounts = accounts;
+    this.pageDiv.querySelector('customer-accounts-page').addEventListener('back',this.loadHomePage.bind(this));
+    this.pageDiv.querySelector('customer-accounts-page').addEventListener('update-account',this.__updateAccount.bind(this));
+    this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__manageCustomers.bind(this));
+  }
+  __updateAccount(event){
+    this.api.putCall(`/accounts/${event.detail.id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,{nickname:event.detail.nickname})
+      .catch((error)=>{
+        console.log(error);
     });
   }
 }
@@ -222,7 +239,7 @@ class CreateCustomer extends HTMLElement {
   }
   connectedCallback(){
     this._shadowRoot.innerHTML = `<style>.label{width:100px;padding-top:10px}
-</style><h3>Customer DetailsPage!</h3><div class="label">First Name:</div><input id="firstName"/><br><div class="label">Last Name:</div><input id="lastName"/><br><div class="label">Street Number:</div><input id="streetNumber"/><br><div class="label">Street Name:</div><input id="streetName"/><br><div class="label">City:</div><input id="city"/><br><div class="label">State:</div><input id="state"/><br><div class="label">Zip:</div><input id="zip"/><br><div class="horizontal-div"><button id="back">Back</button><button id="create">Save</button></div>`;
+</style><h3>Customer DetailsPage!</h3><div class="label">First Name:</div><input id="firstName"/><br><div class="label">Last Name:</div><input id="lastName"/><br><div class="label">Street Number:</div><input id="streetNumber"/><br><div class="label">Street Name:</div><input id="streetName"/><br><div class="label">City:</div><input id="city"/><br><div class="label">State:</div><input id="state"/><br><div class="label">Zip:</div><input id="zip"/><br><div class="horizontal-div"><button id="back">Home</button><button id="create">Save</button></div>`;
     this.firstName = this._shadowRoot.querySelector('#firstName');
     this.lastName = this._shadowRoot.querySelector('#lastName');
     this.streetNumber = this._shadowRoot.querySelector('#streetNumber');
@@ -317,9 +334,8 @@ class ManageCustomers extends HTMLElement {
   }
   connectedCallback(){
     this._shadowRoot.innerHTML = `<style>.container{padding-bottom:20px}
-</style><h3>Manage Customers Page!</h3><div id="customerDiv"></div><div class="horizontal-div"><button id="back">Back</button><button id="delete">Delete</button></div>`;
+</style><h3>Manage Customers Page!</h3><div id="customerDiv"></div><div class="horizontal-div"><button id="back">Home</button></div>`;
     this.backButton = this._shadowRoot.querySelector('#back');
-    this.deleteButton = this._shadowRoot.querySelector('#delete');
     this.customerDiv = this._shadowRoot.querySelector('#customerDiv');
     this.__addEventListeners();
   }
@@ -349,21 +365,20 @@ class ManageCustomers extends HTMLElement {
       customerContainer.innerHTML = `<div class='name'>${customer.first_name} ${customer.last_name}</div>
         <div class="addressLine1">${customer.address.street_number} ${customer.address.street_name}</div>
         <div class="addressLine2">${customer.address.city}, ${customer.address.state} ${customer.address.zip}</div>
-        <button id="${customer._id}" class="edit-button">Edit Customer Details</button>`;
+        <button id="${customer._id}" class="edit-button">Edit Customer Details</button>
+        <button id="${customer._id}" class="accounts">View Customer Accounts</button>`;
       this.customerDiv.appendChild(customerContainer);
     });
     this.customerDiv.querySelectorAll('.edit-button').forEach((button)=>{
       button.addEventListener('click',this.__editCustomer.bind(this));
     });
+    this.customerDiv.querySelectorAll('.accounts').forEach((button)=>{
+      button.addEventListener('click',this.__customerAccounts.bind(this));
+    });
   }
-
   back(){
     console.log('back');
     this.dispatchEvent(new CustomEvent('back'));
-  }
-  __deleteCustomer(event){
-    console.log('inside delete customer');
-    console.log(event.currentTarget.getAttribute('id'));
   }
   __editCustomer(event){
     console.log('inside edit customer');
@@ -371,10 +386,84 @@ class ManageCustomers extends HTMLElement {
     let id = event.currentTarget.getAttribute('id');
     this.__emitUpdateEvent({type:'edit',id:id});
   }
+  __customerAccounts(event){
+    console.log('inside accounts');
+    console.log(event.currentTarget.getAttribute('id'));
+    let id = event.currentTarget.getAttribute('id');
+    this.__emitUpdateEvent({type:'accounts',id:id});
+  }
   __emitUpdateEvent(event){
     this.dispatchEvent(new CustomEvent('manage-customers',{detail:event}));
   }
 }
 if(!customElements.get('manage-customers')){
   customElements.define('manage-customers', ManageCustomers);
+}
+
+class CustomerAccountsPage extends HTMLElement {
+  constructor(){
+    super();
+    this._shadowRoot = this.attachShadow({mode: 'open'});
+  }
+  connectedCallback(){
+    this._shadowRoot.innerHTML = `<style>.container{padding-bottom:20px}.horizontal-div{display:flex}.label{padding-right:20px;width:70px}
+</style><h3>Customer Accounts!</h3><div id="accounts"></div><div class="horizontal-div"><button id="customers">Manage Customers</button><button id="back">Home</button></div>`;
+    this.backButton = this._shadowRoot.querySelector('#back');
+    this.accountsDiv = this._shadowRoot.querySelector('#accounts');
+    this.customerButton = this._shadowRoot.querySelector('#customers');
+    this.__addEventListeners();
+  }
+  disconnectedCallback(){
+
+  }
+  attributeChangedCallback(){
+
+  }
+  adoptedCallback(){
+
+  }
+  __addEventListeners(){
+    this.backButton.addEventListener('click',this.back.bind(this));
+    this.customerButton.addEventListener('click',this.manageCustomers.bind(this));
+  }
+  get accounts() {
+    return this._accounts;
+  }
+  set accounts(_value){
+    this._accounts = _value;
+    this.loadData();
+  }
+  loadData(){
+    this.accounts.forEach((account)=>{
+      let accountContainer = document.createElement('div');
+      accountContainer.setAttribute('class','container');
+      accountContainer.innerHTML = `<div class="horizontal-div"><div class="label">Nickname:</div>
+        <div class='name'><input data="${account._id}" value="${account.nickname}" /></div></div>
+        <div class="horizontal-div"><div class="label">Type:</div><div class="type">${account.type}</div></div>
+        <div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards">${account.rewards}</div></div>
+        <div class="horizontal-div"><div class="label">Balance:</div><div class="balance">${account.balance}</div></div>
+        <button id="${account._id}" class="save-button">Update Account Name</button>`;
+      this.accountsDiv.appendChild(accountContainer);
+    });
+    this.accountsDiv.querySelectorAll('.save-button').forEach((button)=>{
+      button.addEventListener('click',this.__emitUpdateEvent.bind(this));
+    });
+    if(this.accounts.length === 0){
+      this.accountsDiv.innerHTML = 'No accounts yet.';
+    }
+  }
+  back(){
+    this.dispatchEvent(new CustomEvent('back'));
+  }
+  manageCustomers(){
+    this.dispatchEvent(new CustomEvent('customers'));
+  }
+  __emitUpdateEvent(event){
+    let id = event.currentTarget.getAttribute('id');
+    let nickname = this.accountsDiv.querySelector(`input[data="${id}"]`).value;
+    this.dispatchEvent(new CustomEvent('update-account',{detail:{id:id, nickname:nickname}}));
+  }
+}
+if(!customElements.get('customer-accounts-page')){
+  customElements.define('customer-accounts-page', CustomerAccountsPage);
 }
