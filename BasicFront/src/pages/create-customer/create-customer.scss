@@ -1,5 +1,5 @@
 .label {
-  width: 100px;
+  width: 200px;
   padding-top: 10px;
 }
 button {
@@ -27,4 +27,9 @@ button {
 .neutral-button {
   background-color: dimgrey;
   color: white;
+}
+
+input {
+  padding: 5px;
+  width: 200px;
 }

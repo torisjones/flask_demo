@@ -116,7 +116,7 @@ class FlaskDemoRoute extends HTMLElement {
     this.api = new NessieApi();
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style>button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}
+    this._shadowRoot.innerHTML = `<style>button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}#pageDiv{font-family:sans-serif}h1{font-family:sans-serif}
 </style><h1>Nessie Flask!</h1><div id="pageDiv"><button id="newCustomer" class="create">New Customer</button><br><button id="manageCustomers" class="manage">Manage Customers</button></div>`;
     this.pageDiv = this._shadowRoot.querySelector('#pageDiv');
     this.__getCustomers();
@@ -259,7 +259,7 @@ class CreateCustomer extends HTMLElement {
     };
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style>.label{width:100px;padding-top:10px}button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}
+    this._shadowRoot.innerHTML = `<style>.label{width:200px;padding-top:10px}button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}input{padding:5px;width:200px}
 </style><h3>Customer DetailsPage!</h3><div class="label">First Name:</div><input id="firstName"/><br><div class="label">Last Name:</div><input id="lastName"/><br><div class="label">Street Number:</div><input id="streetNumber"/><br><div class="label">Street Name:</div><input id="streetName"/><br><div class="label">City:</div><input id="city"/><br><div class="label">State:</div><input id="state"/><br><div class="label">Zip:</div><input id="zip"/><br><div class="horizontal-div"><button id="back" class="neutral-button">Home</button><button id="create" class="create">Save</button></div>`;
     this.firstName = this._shadowRoot.querySelector('#firstName');
     this.lastName = this._shadowRoot.querySelector('#lastName');
