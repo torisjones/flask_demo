@@ -90,12 +90,9 @@ class CreateCustomer extends HTMLElement {
     this.zip.value = this.data.address.zip;
   }
   back(){
-    console.log('back');
     this.dispatchEvent(new CustomEvent('back'));
   }
   __emitUpdateEvent(){
-    console.log('create customer');
-    console.log(this.newCustomer);
     this.dispatchEvent(new CustomEvent('create-customer',{detail:this.newCustomer}));
   }
 }
