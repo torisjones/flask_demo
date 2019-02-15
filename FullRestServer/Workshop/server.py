@@ -1,9 +1,10 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort
 import uuid
 import hashlib
 from copy import copy
 from random import randint
 app = Flask(__name__)
+
 
 # Databases
 
@@ -187,79 +188,21 @@ def handle_invalid_usage(error):
     return response
 
 
-@app.route("/customers", methods=["GET"])
-def get_customer():
-    return jsonify([cust.to_json() for i, cust in CUSTOMERS.items()])
+# Route 1: GET all Customers from the /customers endpoint
 
+# Route 2: GET Customer by customer ID from the /customers/<id> endpoint
 
-@app.route("/customers/<id>", methods=["GET"])
-def get_customer_by_id(id):
-    if id not in CUSTOMERS:
-        return jsonify({"code": 404, "message": "This id does not exist in customers"}), 404
-    return jsonify(CUSTOMERS[id].to_json())
+# Route 3: POST Customer to the /customers endpoint
 
+# Route 4: PUT Customer by customer ID from the /customers/<id> endpoint
 
-@app.route("/customers", methods=["POST"])
-def add_customer():
-    new_customer = Customer(**request.json)
-    new_customer.validate()
-    CUSTOMERS[new_customer.get_id()] = new_customer
-    return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()})
+# Route 5: GET Accounts belonging to customer from the /customers/<customer_id>/accounts endpoint
 
+# Route 6: POST Account belonging to customer to the /customers/<customer_id>/accounts endpoint
 
-@app.route("/customers/<id>", methods=["PUT"])
-def put_customer_by_id(id):
-    if id not in CUSTOMERS:
-        return jsonify({"code": 404, "message": "This id does not exist in customers"}), 404
-    customer = copy(CUSTOMERS[id])
-    customer.update(new_values=request.json)
-    customer.validate()
-    CUSTOMERS[id] = customer
-    return jsonify({"code": 202, "message": "Accepted customer update"})
+# Route 7: PUT Account by account id to the /accounts/<account_id> endpoint
 
-
-@app.route("/customers/<customer_id>/accounts", methods=["GET"])
-def get_accounts_by_customer(customer_id):
-    if customer_id not in CUSTOMERS:
-        return jsonify({"code": 404, "message": "This id does not exist in customers"}), 404
-    return jsonify([ACCOUNTS[account_id].to_json() for account_id in CUSTOMERS[customer_id].accounts])
-
-
-@app.route("/customers/<customer_id>/accounts", methods=["POST"])
-def add_account(customer_id):
-    if customer_id not in CUSTOMERS:
-        return (jsonify({"code": 404, "message": "Customer does not exist"}), 404)
-
-    new_account = Account(**request.json)
-    new_account.customer_id = customer_id
-    new_account.validate()
-    ACCOUNTS[new_account.get_id()] = new_account
-    CUSTOMERS[new_account.customer_id].add_account(new_account.get_id())
-
-    return jsonify({"code": 201, "message": "Account created", "objectCreated": new_account.to_json()})
-
-
-@app.route("/accounts/<account_id>", methods=["PUT"])
-def put_account(account_id):
-    if account_id not in ACCOUNTS:
-        return jsonify({"code": 404, "message": "This id does not exist in accounts"}), 404
-
-    account = copy(ACCOUNTS[account_id])
-    account.update(new_values=request.json)
-    account.validate()
-    ACCOUNTS[account_id] = account
-    return jsonify({"code": 202, "message": "Accepted account update"})
-
-
-@app.route("/accounts/<account_id>", methods=["DELETE"])
-def remove_account(account_id):
-    if account_id not in ACCOUNTS:
-        return jsonify({"code": 404, "message": "This id does not exist in accounts"}), 404
-    customer_id = ACCOUNTS[account_id].customer_id
-    CUSTOMERS[customer_id].remove_account(account_id)
-    del ACCOUNTS[account_id]
-
-    return ('', 204)
+# Route 8: DELETE Account by account id to the /accounts/<account_id> endpoint
 
 
 if __name__ == "__main__":
