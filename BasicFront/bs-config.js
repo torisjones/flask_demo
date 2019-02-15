@@ -1,7 +1,8 @@
 
 var proxy = require('proxy-middleware');
 var url = require('url');
-var proxyListing = url.parse('http://api.reimaginebanking.com/');
+var proxyListing = url.parse('http://localhost:5000/');
+// var proxyListing = url.parse('http://api.reimaginebanking.com/');
 proxyListing.route = '/';
 
 module.exports = {

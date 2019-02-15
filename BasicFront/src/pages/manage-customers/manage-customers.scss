@@ -1,3 +1,37 @@
 .container {
-  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border: solid;
+  width: 350px;
+  padding-top: 10px;
+}
+button {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  width: 150px;
+}
+
+.create {
+  background-color: seagreen;
+  color: white;
+}
+
+.manage {
+  background-color: midnightblue;
+  color: white;
+}
+
+.regressive {
+  background-color: darkred;
+  color: white;
+}
+
+.neutral-button {
+  background-color: dimgrey;
+  color: white;
+}
+
+.customer {
+  padding-left: 20px;
+  width:350px;
 }
