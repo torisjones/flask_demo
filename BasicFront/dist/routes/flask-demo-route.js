@@ -7,7 +7,8 @@ class FlaskDemoRoute extends HTMLElement {
     this.api = new NessieApi();
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style></style><h1>Nessie Flask!</h1><div id="pageDiv"><button id="newCustomer">New Customer</button><br><button id="manageCustomers">Manage Customers</button></div>`;
+    this._shadowRoot.innerHTML = `<style>button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}
+</style><h1>Nessie Flask!</h1><div id="pageDiv"><button id="newCustomer" class="create">New Customer</button><br><button id="manageCustomers" class="manage">Manage Customers</button></div>`;
     this.pageDiv = this._shadowRoot.querySelector('#pageDiv');
     this.__getCustomers();
     this.__addEventListeners();
@@ -28,9 +29,9 @@ class FlaskDemoRoute extends HTMLElement {
     this.manageCustomersButton.addEventListener('click',this.__manageCustomers.bind(this));
   }
   loadHomePage(){
-    this.pageDiv.innerHTML = '<button id="newCustomer">New Customer</button>\n' +
+    this.pageDiv.innerHTML = '<button id="newCustomer" class="create">New Customer</button>\n' +
       '  <br>\n' +
-      '  <button id="manageCustomers">Manage Customers</button>';
+      '  <button id="manageCustomers" class="manage">Manage Customers</button>';
     this.__addEventListeners();
   }
   __getCustomers(){

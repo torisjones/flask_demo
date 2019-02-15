@@ -53,8 +53,8 @@ class CustomerAccountsPage extends HTMLElement {
         <div class="horizontal-div"><div class="label">Type:</div><div class="type">${account.type}</div></div>
         <div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards">${account.rewards}</div></div>
         <div class="horizontal-div"><div class="label">Balance:</div><div class="balance">${account.balance}</div></div>
-        <button id="${account._id}" class="save-button">Update Account Name</button>
-        <button id="${account._id}" class="delete-button">Delete Account</button>`;
+        <button id="${account._id}" class="save-button create">Update Account Name</button>
+        <button id="${account._id}" class="delete-button regressive">Delete Account</button>`;
       this.accountsDiv.appendChild(accountContainer);
     });
     this.accountsDiv.querySelectorAll('.save-button').forEach((button)=>{

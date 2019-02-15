@@ -26,7 +26,9 @@ class ManageCustomers extends HTMLElement {
   }
   set customers(_value){
     this._customers = _value;
-    this.__buildCustomers();
+    if(_value){
+      this.__buildCustomers();
+    }
   }
   __buildCustomers(){
     this.customers.forEach((customer)=>{
@@ -35,8 +37,8 @@ class ManageCustomers extends HTMLElement {
       customerContainer.innerHTML = `<div class='name'>${customer.first_name} ${customer.last_name}</div>
         <div class="addressLine1">${customer.address.street_number} ${customer.address.street_name}</div>
         <div class="addressLine2">${customer.address.city}, ${customer.address.state} ${customer.address.zip}</div>
-        <button id="${customer._id}" class="edit-button">Edit Customer Details</button>
-        <button id="${customer._id}" class="accounts">View Customer Accounts</button>`;
+        <button id="${customer._id}" class="edit-button create">Edit Customer Details</button>
+        <button id="${customer._id}" class="accounts manage">View Customer Accounts</button>`;
       this.customerDiv.appendChild(customerContainer);
     });
     this.customerDiv.querySelectorAll('.edit-button').forEach((button)=>{

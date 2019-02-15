@@ -77,7 +77,6 @@ class CreateCustomer extends HTMLElement {
         break;
       case 'zip':
         this.newCustomer.address.zip = event.currentTarget.value;
-        break;
     }
   }
   loadData(){
