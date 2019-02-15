@@ -35,6 +35,17 @@ class JsonRequest(object):
                 json_dict[key] = self.__dict__[key]
         return json_dict
 
+    def update(self, new_values, model=None):
+        if model is None:
+            model = self.MODEL
+        for key, value in new_values.items():
+            if model.get(key) is None:
+                raise ValueError("Key {key} not found in model!".format(key=key))
+            if type(value) == dict:
+                self.update(value, model[key])
+            else:
+                self.__dict__[key] = value
+
 
 class Customer(JsonRequest):
     MODEL = {
@@ -97,24 +108,38 @@ class Account(JsonRequest):
         return self._id
 
 
+@app.route("/customer", methods=["GET"])
+def get_customer():
+    return jsonify([cust.to_json() for i, cust in CUSTOMERS.items()])
+
+
+@app.route("/customer/<id>", methods=["GET"])
+def get_customer_by_id(id):
+    if id not in CUSTOMERS:
+        return jsonify({"code": 404, "message": "This id does not exist in customers"})
+    return jsonify(CUSTOMERS[id].to_json())
+
+
+@app.route("/customer/<id>", methods=["PUT"])
+def put_customer_by_id(id):
+    if id not in CUSTOMERS:
+        abort(404)
+    customer = CUSTOMERS[id]
+    customer.update(new_values=request.json)
+    return jsonify({"code": 202, "message": "Accepted customer update"})
+
+
 @app.route("/customer", methods=["POST"])
 def add_customer():
     new_customer = Customer(**request.json)
     CUSTOMERS[new_customer.get_id()] = new_customer
-
     return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()})
-
-
-@app.route("/customer", methods=["GET"])
-def get_customer():
-    return jsonify([cust.to_json() for i, cust in CUSTOMERS.items()])
 
 
 @app.route("/customers/<id>/accounts", methods=["GET"])
 def get_accounts_by_customer(id):
     if id not in CUSTOMERS:
         abort(400)
-
     return jsonify([ACCOUNTS[account_id].to_json() for account_id in CUSTOMERS[id].accounts])
 
 
