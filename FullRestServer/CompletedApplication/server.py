@@ -96,9 +96,9 @@ class Account(JsonRequest):
         "customer_id": str
     }
 
-    def __init__(self, type, customer_id=None, nickname=None, rewards=0, balance=0):
+    def __init__(self, type, account_number=None, customer_id=None, nickname=None, rewards=0, balance=0):
         self.type = type
-        self.account_number = ''.join(["{0}".format(randint(0, 9)) for num in range(0, 16)])
+        self.account_number = ''.join(["{0}".format(randint(0, 9)) for num in range(0, 16)]) if account_number is None else account_number
         self.customer_id = customer_id
         self.nickname = nickname
         self.rewards = rewards
