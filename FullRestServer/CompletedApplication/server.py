@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, abort
 import uuid
 import hashlib
+from random import randint
 app = Flask(__name__)
 
 CUSTOMERS = dict()
@@ -95,9 +96,9 @@ class Account(JsonRequest):
         "customer_id": str
     }
 
-    def __init__(self, type, account_number, customer_id=None, nickname=None, rewards=0, balance=0):
+    def __init__(self, type, account_number=None, customer_id=None, nickname=None, rewards=0, balance=0):
         self.type = type
-        self.account_number = account_number
+        self.account_number = ''.join(["{0}".format(randint(0, 9)) for num in range(0, 16)]) if account_number is None else account_number
         self.customer_id = customer_id
         self.nickname = nickname
         self.rewards = rewards
@@ -123,7 +124,7 @@ def get_customer_by_id(id):
 @app.route("/customers/<id>", methods=["PUT"])
 def put_customer_by_id(id):
     if id not in CUSTOMERS:
-        abort(404)
+        return (jsonify({"code": 404, "message": "This id does not exist in customers"}), 400)
     customer = CUSTOMERS[id]
     customer.update(new_values=request.json)
     return jsonify({"code": 202, "message": "Accepted customer update"})
@@ -139,15 +140,16 @@ def add_customer():
 @app.route("/customers/<customer_id>/accounts", methods=["GET"])
 def get_accounts_by_customer(customer_id):
     if customer_id not in CUSTOMERS:
-        abort(400)
+        return (jsonify({"code": 404, "message": "This id does not exist in customers"}), 400)
     return jsonify([ACCOUNTS[account_id].to_json() for account_id in CUSTOMERS[customer_id].accounts])
 
 
 @app.route("/customers/<customer_id>/accounts", methods=["POST"])
 def add_account(customer_id):
-    new_account = Account(**request.json)
     if customer_id not in CUSTOMERS:
-        abort(400)
+        return (jsonify({"code": 400, "message": "Customer does not exist"}), 400)
+
+    new_account = Account(**request.json)
     new_account.customer_id = customer_id
     ACCOUNTS[new_account.get_id()] = new_account
     CUSTOMERS[new_account.customer_id].add_account(new_account.get_id())
