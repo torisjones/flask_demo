@@ -2,10 +2,45 @@
 
 Flask is a popular open source package for python that makes developing
 web applications quick and simple. This tutorial is an introduction to the
-framework and the development of RESTful web servers. 
+framework and the development of RESTful web servers. We will be integrating
+with Capital One's Nessie Api to serve our mock data. More information on 
+Nessie can be found at http://api.reimaginebanking.com/
 
 
 ### Setup
+
+#### Install Python (Mac)
+
+Confirm your Python version by running the following command in terminal:
+
+```python --version```
+
+If it is version 3.6+, move on to 'Hello World Application'. If not, check to see if you have homebrew installed with:
+
+```$ brew doctor``` 
+
+```Your system is ready to brew.```
+
+If you do not have homebrew installed, get it. It's a lifesaver. Homebrew depends on Apple’s Xcode package, so run the following command to install Xcode first:
+
+```$ xcode-select --install```
+
+Click through all the confirmation commands (Xcode is a large program so this might take a while to install depending on your internet connection).
+
+Next, install Homebrew:
+
+```/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"```
+
+Once you have homebrew, run the following command to install the latest python version
+
+```brew install python3```
+
+#### Install Python (Windows)
+
+Download python 3.7 at https://www.python.org/downloads/windows/
+
+## Hello World Application
+
 To get this project running, you will need to have installed python (preferably python 3.6+) and
 a text editor. 
 
@@ -23,9 +58,13 @@ cd HelloWorld/basic/
 python3 server.py
 ```
 
-
-## Hello World Application
-
 ## Basic Front End
+
+To run you will need npm. To install npm go to (https://www.npmjs.com/get-npm).
+
+1. Navigate to /BasicFront
+2. Run `npm install`
+3. Run `npm run start`
+4. Project should open a new window for you, if it does not, open a tab and go to `http://localhost:8050/`
 
 ## Account Management
