@@ -1,6 +1,4 @@
-.container {
-  padding-bottom: 20px;
-}
+
 .horizontal-div {
   display: flex;
 }
@@ -36,4 +34,14 @@ button {
 .neutral-button {
   background-color: dimgrey;
   color: white;
+}
+.container {
+  margin-bottom: 20px;
+  border: solid;
+  width: 350px;
+  padding-top: 10px;
+}
+.account {
+  padding-left: 20px;
+  width:350px;
 }

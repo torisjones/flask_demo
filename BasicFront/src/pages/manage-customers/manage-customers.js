@@ -31,14 +31,36 @@ class ManageCustomers extends HTMLElement {
     }
   }
   __buildCustomers(){
+    // this.customers = [{
+    //   first_name: 'Tori',
+    //   last_name: 'Jones',
+    //   address: {
+    //     street_name: 'Whitestone ln',
+    //     street_number: '5000',
+    //     city: 'Plano',
+    //     state: 'TX',
+    //     zip: '75024'
+    //   }
+    // },
+    //   {
+    //     first_name: 'Kelcy',
+    //     last_name: 'Jones',
+    //     address: {
+    //       street_name: 'Whitestone ln',
+    //       street_number: '5000',
+    //       city: 'Plano',
+    //       state: 'TX',
+    //       zip: '75024'
+    //     }
+    //   }];
     this.customers.forEach((customer)=>{
       let customerContainer = document.createElement('div');
       customerContainer.setAttribute('class','container');
-      customerContainer.innerHTML = `<div class='name'>${customer.first_name} ${customer.last_name}</div>
-        <div class="addressLine1">${customer.address.street_number} ${customer.address.street_name}</div>
-        <div class="addressLine2">${customer.address.city}, ${customer.address.state} ${customer.address.zip}</div>
-        <button id="${customer._id}" class="edit-button create">Edit Customer Details</button>
-        <button id="${customer._id}" class="accounts manage">View Customer Accounts</button>`;
+      customerContainer.innerHTML = `<div class="customer"><div class='name'>${customer.first_name || ''} ${customer.last_name || ''}</div>
+        <div class="addressLine1">${customer.address.street_number|| ''} ${customer.address.street_name|| ''}</div>
+        <div class="addressLine2">${customer.address.city || ''}, ${customer.address.state || ''} ${customer.address.zip || ''}</div>
+        </div><button id="${customer._id}" class="edit-button create">Edit Customer Details</button>
+        <button id="${customer._id}" class="accounts manage">Customer Accounts</button>`;
       this.customerDiv.appendChild(customerContainer);
     });
     this.customerDiv.querySelectorAll('.edit-button').forEach((button)=>{

@@ -86,6 +86,7 @@ class FlaskDemoRoute extends HTMLElement {
     });
   }
   __getAccounts(id) {
+    this.__viewAccounts();
     this.api.getCall(`/customers/${id}/accounts?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then((data)=>{
       this.__viewAccounts(data,id);
     }).catch((error)=>{
