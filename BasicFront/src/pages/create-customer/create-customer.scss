@@ -1,4 +1,35 @@
 .label {
-  width: 100px;
+  width: 200px;
   padding-top: 10px;
+}
+button {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 5px;
+  width: 150px;
+}
+
+.create {
+  background-color: seagreen;
+  color: white;
+}
+
+.manage {
+  background-color: midnightblue;
+  color: white;
+}
+
+.regressive {
+  background-color: darkred;
+  color: white;
+}
+
+.neutral-button {
+  background-color: dimgrey;
+  color: white;
+}
+
+input {
+  padding: 5px;
+  width: 200px;
 }
