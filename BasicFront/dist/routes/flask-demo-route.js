@@ -7,7 +7,7 @@ class FlaskDemoRoute extends HTMLElement {
     this.api = new NessieApi();
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style>button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}
+    this._shadowRoot.innerHTML = `<style>button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}#pageDiv{font-family:sans-serif}h1{font-family:sans-serif}
 </style><h1>Nessie Flask!</h1><div id="pageDiv"><button id="newCustomer" class="create">New Customer</button><br><button id="manageCustomers" class="manage">Manage Customers</button></div>`;
     this.pageDiv = this._shadowRoot.querySelector('#pageDiv');
     this.__getCustomers();
