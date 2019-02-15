@@ -5,7 +5,6 @@ class CustomerAccountsPage extends HTMLElement {
   }
   connectedCallback(){
     this._shadowRoot.innerHTML = tempHtml;
-    // this.backButton = this._shadowRoot.querySelector('#back');
     this.accountsDiv = this._shadowRoot.querySelector('#accounts');
     this.customerButton = this._shadowRoot.querySelector('#customers');
     this.createAccountDiv = this._shadowRoot.querySelector('#createAccountDiv');
@@ -25,7 +24,6 @@ class CustomerAccountsPage extends HTMLElement {
 
   }
   __addEventListeners(){
-    // this.backButton.addEventListener('click',this.back.bind(this));
     this.backAccountButton.addEventListener('click',this.__viewManageAccounts.bind(this))
     this.customerButton.addEventListener('click',this.manageCustomers.bind(this));
     this.createAccountButton.addEventListener('click',this.__viewCreateAccount.bind(this));
@@ -47,20 +45,6 @@ class CustomerAccountsPage extends HTMLElement {
     this._customerId = _value;
   }
   loadData(){
-    // this.accounts = [{
-    //   _id:987654,
-    //   nickname: 'test account',
-    //   type: 'Savings',
-    //   rewards: 9876543,
-    //   balance: 345678
-    // },
-    //   {
-    //     _id:987654,
-    //     nickname: 'test account2',
-    //     type: 'Checking',
-    //     rewards: 9876,
-    //     balance: 345678
-    //   }];
     this.accounts.forEach((account)=>{
       let accountContainer = document.createElement('div');
       accountContainer.setAttribute('class','container');
@@ -90,11 +74,13 @@ class CustomerAccountsPage extends HTMLElement {
   }
   __createAccount(){
     let body = {};
+    let acctId = new Date().valueOf();
     this.createAccountDiv.querySelectorAll('input').forEach((input)=>{
       input.getAttribute('id') !== 'balance' && input.getAttribute('id') !== 'rewards' ?
         body[input.getAttribute('id')] = input.value :
         body[input.getAttribute('id')] = parseInt(input.value);
     });
+    body['account_number'] = acctId.toString();
     this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'create',custId:this.customerId,body:body}}));
     this.__clearData();
   }

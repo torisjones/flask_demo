@@ -56,27 +56,29 @@ class CreateCustomer extends HTMLElement {
     this.loadData();
   }
   updateCustomer(event){
-    switch(event.currentTarget.getAttribute('id')){
-      case 'firstName':
-        this.newCustomer.first_name = event.currentTarget.value;
-        break;
-      case 'lastName':
-        this.newCustomer.last_name = event.currentTarget.value;
-        break;
-      case 'streetNumber':
-        this.newCustomer.address.street_number = event.currentTarget.value;
-        break;
-      case 'streetName':
-        this.newCustomer.address.street_name = event.currentTarget.value;
-        break;
-      case 'city':
-        this.newCustomer.address.city = event.currentTarget.value;
-        break;
-      case 'state':
-        this.newCustomer.address.state = event.currentTarget.value;
-        break;
-      case 'zip':
-        this.newCustomer.address.zip = event.currentTarget.value;
+    if(this.newCustomer){
+      switch(event.currentTarget.getAttribute('id')){
+        case 'firstName':
+          this.newCustomer.first_name = event.currentTarget.value;
+          break;
+        case 'lastName':
+          this.newCustomer.last_name = event.currentTarget.value;
+          break;
+        case 'streetNumber':
+          this.newCustomer.address.street_number = event.currentTarget.value;
+          break;
+        case 'streetName':
+          this.newCustomer.address.street_name = event.currentTarget.value;
+          break;
+        case 'city':
+          this.newCustomer.address.city = event.currentTarget.value;
+          break;
+        case 'state':
+          this.newCustomer.address.state = event.currentTarget.value;
+          break;
+        case 'zip':
+          this.newCustomer.address.zip = event.currentTarget.value;
+      }
     }
   }
   loadData(){
@@ -92,6 +94,8 @@ class CreateCustomer extends HTMLElement {
     this.dispatchEvent(new CustomEvent('back'));
   }
   __emitUpdateEvent(){
+    console.log('here');
+    console.log(this.newCustomer);
     this.dispatchEvent(new CustomEvent('create-customer',{detail:this.newCustomer}));
   }
 }

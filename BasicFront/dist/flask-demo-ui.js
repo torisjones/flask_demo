@@ -116,11 +116,11 @@ class FlaskDemoRoute extends HTMLElement {
     this.api = new NessieApi();
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style>button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}#pageDiv{font-family:sans-serif}h1{font-family:sans-serif}
-</style><h1>Nessie Flask!</h1><div id="pageDiv"><button id="newCustomer" class="create">New Customer</button><br><button id="manageCustomers" class="manage">Manage Customers</button></div>`;
+    this._shadowRoot.innerHTML = `<style>button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}#pageDiv{font-family:sans-serif}h1{font-family:sans-serif}.error{color:darkred}
+</style><h1>Nessie Flask!</h1><div class="error"></div><div id="pageDiv"></div>`;
     this.pageDiv = this._shadowRoot.querySelector('#pageDiv');
+    this.errorDiv = this._shadowRoot.querySelector('.error');
     this.__getCustomers();
-    this.__addEventListeners();
   }
   disconnectedCallback(){
 
@@ -132,48 +132,44 @@ class FlaskDemoRoute extends HTMLElement {
 
   }
   __addEventListeners(){
-    this.createCustomerButton = this._shadowRoot.querySelector('#newCustomer');
-    this.manageCustomersButton = this._shadowRoot.querySelector('#manageCustomers');
-    this.createCustomerButton.addEventListener('click',this.__createCustomer.bind(this));
-    this.manageCustomersButton.addEventListener('click',this.__manageCustomers.bind(this));
-  }
-  loadHomePage(){
-    this.pageDiv.innerHTML = '<button id="newCustomer" class="create">New Customer</button>\n' +
-      '  <br>\n' +
-      '  <button id="manageCustomers" class="manage">Manage Customers</button>';
-    this.__addEventListeners();
   }
   __getCustomers(){
-    this.api.getCall('/customers?key=6122e0b7dd9cf10ce7cb1135ac481e90').then((data)=>{
+    this.api.getCall('/customers').then((data)=>{
       this.customerList = data;
+      this.__manageCustomers();
     }).catch((error)=>{
       console.log(error);
+      this.errorDiv.innerHTML = JSON.stringify(error);
     });
   }
   __createCustomer(customer){
     this.pageDiv.innerHTML = '<create-customer></create-customer>';
-    if(customer.address){this.pageDiv.querySelector('create-customer').data = customer; }
-    this.pageDiv.querySelector('create-customer').addEventListener('back',this.loadHomePage.bind(this));
+    this.errorDiv.innerHTML = '';
+    if(customer && customer.address){this.pageDiv.querySelector('create-customer').data = customer; }
+    this.pageDiv.querySelector('create-customer').addEventListener('back',this.__getCustomers.bind(this));
     this.pageDiv.querySelector('create-customer').addEventListener('create-customer',this.createCustomerCall.bind(this));
   }
   createCustomerCall(event){
     if(event.detail._id){
-      this.api.putCall(`/customers/${event.detail.id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,event.detail.address).catch((error)=>{
-        console.log(error);
-      });
-    } else {
-      this.api.postCall('/customers?key=6122e0b7dd9cf10ce7cb1135ac481e90',event.detail).then(()=>{
+      this.api.putCall(`/customers/${event.detail._id}`,event.detail).then(()=>{
         this.__getCustomers();
       }).catch((error)=>{
         console.log(error);
+        this.errorDiv.innerHTML = JSON.stringify(error);
+      });
+    } else {
+      this.api.postCall('/customers',event.detail).then(()=>{
+        this.__getCustomers();
+      }).catch((error)=>{
+        console.log(error);
+        this.errorDiv.innerHTML = JSON.stringify(error);
       });
     }
-    this.loadHomePage();
   }
   __manageCustomers(){
     this.pageDiv.innerHTML = '<manage-customers></manage-customers>';
+    this.errorDiv.innerHTML = '';
     this.pageDiv.querySelector('manage-customers').customers = this.customerList;
-    this.pageDiv.querySelector('manage-customers').addEventListener('back',this.loadHomePage.bind(this));
     this.pageDiv.querySelector('manage-customers').addEventListener('manage-customers',this.manageCustomersCall.bind(this));
   }
   manageCustomersCall(event){
@@ -184,31 +180,35 @@ class FlaskDemoRoute extends HTMLElement {
       case 'accounts':
         this.__getAccounts(event.detail.id);
         break;
+      case 'create':
+        this.__createCustomer();
+        break;
     }
-    this.loadHomePage();
   }
   __editCustomer(id) {
-    this.api.getCall(`/customers/${id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then((data)=>{
+    this.api.getCall(`/customers/${id}`).then((data)=>{
       this.__createCustomer(data);
     }).catch((error)=>{
       console.log(error);
+      this.errorDiv.innerHTML = JSON.stringify(error);
     });
   }
   __getAccounts(id) {
     this.__viewAccounts();
-    this.api.getCall(`/customers/${id}/accounts?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then((data)=>{
+    this.api.getCall(`/customers/${id}/accounts`).then((data)=>{
       this.__viewAccounts(data,id);
     }).catch((error)=>{
       console.log(error);
+      this.errorDiv.innerHTML = JSON.stringify(error);
     });
   }
   __viewAccounts(accounts,customerId){
     this.pageDiv.innerHTML = '<customer-accounts-page></customer-accounts-page>';
+    this.errorDiv.innerHTML = '';
     this.pageDiv.querySelector('customer-accounts-page').accounts = accounts;
     this.pageDiv.querySelector('customer-accounts-page').customerId = customerId;
-    this.pageDiv.querySelector('customer-accounts-page').addEventListener('back',this.loadHomePage.bind(this));
     this.pageDiv.querySelector('customer-accounts-page').addEventListener('update-account',this.__updateAccount.bind(this));
-    this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__manageCustomers.bind(this));
+    this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__getCustomers.bind(this));
   }
   __updateAccount(event){
     let acctId = event.detail.acctId;
@@ -216,24 +216,27 @@ class FlaskDemoRoute extends HTMLElement {
     let body = event.detail.body;
     switch(event.detail.type){
       case 'update':
-        this.api.putCall(`/accounts/${acctId}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,{nickname:body})
+        this.api.putCall(`/accounts/${acctId}`,{nickname:body})
           .catch((error)=>{
             console.log(error);
+            this.errorDiv.innerHTML = JSON.stringify(error.statusText);
           });
         break;
       case 'remove':
-        this.api.deleteCall(`/accounts/${acctId}?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then(()=>{
+        this.api.deleteCall(`/accounts/${acctId}`).then(()=>{
           this.__getAccounts(custId);
         }).catch((error)=>{
           this.__getAccounts(custId);
           console.log(error);
+          this.errorDiv.innerHTML = JSON.stringify(error);
         });
         break;
       case 'create':
-        this.api.postCall(`/customers/${custId}/accounts?key=6122e0b7dd9cf10ce7cb1135ac481e90`,body).then(()=>{
+        this.api.postCall(`/customers/${custId}/accounts`,body).then(()=>{
           this.__getAccounts(custId);
         }).catch((error)=>{
           console.log(error);
+          this.errorDiv.innerHTML = JSON.stringify(error.statusText);
         });
         break;
     }
@@ -302,27 +305,29 @@ class CreateCustomer extends HTMLElement {
     this.loadData();
   }
   updateCustomer(event){
-    switch(event.currentTarget.getAttribute('id')){
-      case 'firstName':
-        this.newCustomer.first_name = event.currentTarget.value;
-        break;
-      case 'lastName':
-        this.newCustomer.last_name = event.currentTarget.value;
-        break;
-      case 'streetNumber':
-        this.newCustomer.address.street_number = event.currentTarget.value;
-        break;
-      case 'streetName':
-        this.newCustomer.address.street_name = event.currentTarget.value;
-        break;
-      case 'city':
-        this.newCustomer.address.city = event.currentTarget.value;
-        break;
-      case 'state':
-        this.newCustomer.address.state = event.currentTarget.value;
-        break;
-      case 'zip':
-        this.newCustomer.address.zip = event.currentTarget.value;
+    if(this.newCustomer){
+      switch(event.currentTarget.getAttribute('id')){
+        case 'firstName':
+          this.newCustomer.first_name = event.currentTarget.value;
+          break;
+        case 'lastName':
+          this.newCustomer.last_name = event.currentTarget.value;
+          break;
+        case 'streetNumber':
+          this.newCustomer.address.street_number = event.currentTarget.value;
+          break;
+        case 'streetName':
+          this.newCustomer.address.street_name = event.currentTarget.value;
+          break;
+        case 'city':
+          this.newCustomer.address.city = event.currentTarget.value;
+          break;
+        case 'state':
+          this.newCustomer.address.state = event.currentTarget.value;
+          break;
+        case 'zip':
+          this.newCustomer.address.zip = event.currentTarget.value;
+      }
     }
   }
   loadData(){
@@ -338,6 +343,8 @@ class CreateCustomer extends HTMLElement {
     this.dispatchEvent(new CustomEvent('back'));
   }
   __emitUpdateEvent(){
+    console.log('here');
+    console.log(this.newCustomer);
     this.dispatchEvent(new CustomEvent('create-customer',{detail:this.newCustomer}));
   }
 }
@@ -352,9 +359,10 @@ class ManageCustomers extends HTMLElement {
   }
   connectedCallback(){
     this._shadowRoot.innerHTML = `<style>.container{margin-bottom:20px;border:solid;width:350px;padding-top:10px}button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}.customer{padding-left:20px;width:350px}
-</style><h3>Manage Customers Page!</h3><div id="customerDiv"></div><div class="horizontal-div"><button id="back" class="neutral-button">Home</button></div>`;
-    this.backButton = this._shadowRoot.querySelector('#back');
+</style><h3>Manage Customers Page!</h3><button id="newCustomer" class="create">New Customer</button><div id="customerDiv"></div><!--<div class="horizontal-div">--><!--<button id="back" class="neutral-button">Home</button>--><!--</div>-->`;
+    // this.backButton = this._shadowRoot.querySelector('#back');
     this.customerDiv = this._shadowRoot.querySelector('#customerDiv');
+    this.createCustomerButton = this._shadowRoot.querySelector('#newCustomer');
     this.__addEventListeners();
   }
   disconnectedCallback(){
@@ -367,7 +375,8 @@ class ManageCustomers extends HTMLElement {
 
   }
   __addEventListeners(){
-    this.backButton.addEventListener('click',this.back.bind(this));
+    this.createCustomerButton.addEventListener('click',this.__createCustomer.bind(this));
+    // this.backButton.addEventListener('click',this.back.bind(this));
   }
   get customers(){
     return this._customers;
@@ -379,28 +388,6 @@ class ManageCustomers extends HTMLElement {
     }
   }
   __buildCustomers(){
-    // this.customers = [{
-    //   first_name: 'Tori',
-    //   last_name: 'Jones',
-    //   address: {
-    //     street_name: 'Whitestone ln',
-    //     street_number: '5000',
-    //     city: 'Plano',
-    //     state: 'TX',
-    //     zip: '75024'
-    //   }
-    // },
-    //   {
-    //     first_name: 'Kelcy',
-    //     last_name: 'Jones',
-    //     address: {
-    //       street_name: 'Whitestone ln',
-    //       street_number: '5000',
-    //       city: 'Plano',
-    //       state: 'TX',
-    //       zip: '75024'
-    //     }
-    //   }];
     this.customers.forEach((customer)=>{
       let customerContainer = document.createElement('div');
       customerContainer.setAttribute('class','container');
@@ -420,6 +407,9 @@ class ManageCustomers extends HTMLElement {
   }
   back(){
     this.dispatchEvent(new CustomEvent('back'));
+  }
+  __createCustomer(){
+    this.__emitUpdateEvent({type:'create'});
   }
   __editCustomer(event){
     let id = event.currentTarget.getAttribute('id');
@@ -444,8 +434,7 @@ class CustomerAccountsPage extends HTMLElement {
   }
   connectedCallback(){
     this._shadowRoot.innerHTML = `<style>.horizontal-div{display:flex}.label{padding-right:20px;width:70px}.hidden{display:none}button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}.container{margin-bottom:20px;border:solid;width:350px;padding-top:10px}.account{padding-left:20px;width:350px}
-</style><h3>Customer Accounts!</h3><div id="manageAccounts"><button id="createAccount" class="create">Create Account</button><div id="accounts"></div><div class="horizontal-div"><button id="customers" class="manage">Manage Customers</button></div></div><div id="createAccountDiv" class="hidden"><div class="horizontal-div"><div class="label">Nickname:</div><div class='name'><input id="nickname"/></div></div><div class="horizontal-div"><div class="label">Type:</div><div class="type"><input id="type"/></div></div><div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards"><input id="rewards"/></div></div><div class="horizontal-div"><div class="label">Balance:</div><div class="balance"><input id="balance"/></div></div><button class="backAccountButton" class="manage">Back to Accounts</button><button class="create-button" class="create">Create Account</button></div>`;
-    // this.backButton = this._shadowRoot.querySelector('#back');
+</style><h3>Customer Accounts!</h3><div id="manageAccounts"><button id="createAccount" class="create">Create Account</button><div id="accounts"></div><div class="horizontal-div"><button id="customers" class="manage">Manage Customers</button></div></div><div id="createAccountDiv" class="hidden"><div class="horizontal-div"><div class="label">Nickname:</div><div class='name'><input id="nickname"/></div></div><div class="horizontal-div"><div class="label">Type:</div><div class="type"><input id="type"/></div></div><div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards"><input id="rewards"/></div></div><div class="horizontal-div"><div class="label">Balance:</div><div class="balance"><input id="balance"/></div></div><button class="backAccountButton manage">Back to Accounts</button><button class="create-button create">Create Account</button></div>`;
     this.accountsDiv = this._shadowRoot.querySelector('#accounts');
     this.customerButton = this._shadowRoot.querySelector('#customers');
     this.createAccountDiv = this._shadowRoot.querySelector('#createAccountDiv');
@@ -465,7 +454,6 @@ class CustomerAccountsPage extends HTMLElement {
 
   }
   __addEventListeners(){
-    // this.backButton.addEventListener('click',this.back.bind(this));
     this.backAccountButton.addEventListener('click',this.__viewManageAccounts.bind(this));
     this.customerButton.addEventListener('click',this.manageCustomers.bind(this));
     this.createAccountButton.addEventListener('click',this.__viewCreateAccount.bind(this));
@@ -487,20 +475,6 @@ class CustomerAccountsPage extends HTMLElement {
     this._customerId = _value;
   }
   loadData(){
-    // this.accounts = [{
-    //   _id:987654,
-    //   nickname: 'test account',
-    //   type: 'Savings',
-    //   rewards: 9876543,
-    //   balance: 345678
-    // },
-    //   {
-    //     _id:987654,
-    //     nickname: 'test account2',
-    //     type: 'Checking',
-    //     rewards: 9876,
-    //     balance: 345678
-    //   }];
     this.accounts.forEach((account)=>{
       let accountContainer = document.createElement('div');
       accountContainer.setAttribute('class','container');
@@ -530,11 +504,13 @@ class CustomerAccountsPage extends HTMLElement {
   }
   __createAccount(){
     let body = {};
+    let acctId = new Date().valueOf();
     this.createAccountDiv.querySelectorAll('input').forEach((input)=>{
       input.getAttribute('id') !== 'balance' && input.getAttribute('id') !== 'rewards' ?
         body[input.getAttribute('id')] = input.value :
         body[input.getAttribute('id')] = parseInt(input.value);
     });
+    body['account_number'] = acctId.toString();
     this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'create',custId:this.customerId,body:body}}));
     this.__clearData();
   }
