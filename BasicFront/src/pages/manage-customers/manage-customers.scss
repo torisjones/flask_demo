@@ -1,5 +1,8 @@
 .container {
-  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border: solid;
+  width: 350px;
+  padding-top: 10px;
 }
 button {
   padding: 10px;
@@ -26,4 +29,9 @@ button {
 .neutral-button {
   background-color: dimgrey;
   color: white;
+}
+
+.customer {
+  padding-left: 20px;
+  width:350px;
 }

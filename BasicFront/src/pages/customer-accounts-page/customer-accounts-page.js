@@ -36,7 +36,9 @@ class CustomerAccountsPage extends HTMLElement {
   }
   set accounts(_value){
     this._accounts = _value;
-    this.loadData();
+    if(_value){
+      this.loadData();
+    }
   }
   get customerId() {
     return this._customerId;
@@ -45,15 +47,29 @@ class CustomerAccountsPage extends HTMLElement {
     this._customerId = _value;
   }
   loadData(){
+    // this.accounts = [{
+    //   _id:987654,
+    //   nickname: 'test account',
+    //   type: 'Savings',
+    //   rewards: 9876543,
+    //   balance: 345678
+    // },
+    //   {
+    //     _id:987654,
+    //     nickname: 'test account2',
+    //     type: 'Checking',
+    //     rewards: 9876,
+    //     balance: 345678
+    //   }];
     this.accounts.forEach((account)=>{
       let accountContainer = document.createElement('div');
       accountContainer.setAttribute('class','container');
-      accountContainer.innerHTML = `<div class="horizontal-div"><div class="label">Nickname:</div>
+      accountContainer.innerHTML = `<div class="account"><div class="horizontal-div"><div class="label">Nickname:</div>
         <div class='name'><input data="${account._id}" value="${account.nickname}" /></div></div>
         <div class="horizontal-div"><div class="label">Type:</div><div class="type">${account.type}</div></div>
         <div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards">${account.rewards}</div></div>
         <div class="horizontal-div"><div class="label">Balance:</div><div class="balance">${account.balance}</div></div>
-        <button id="${account._id}" class="save-button create">Update Account Name</button>
+        </div><button id="${account._id}" class="save-button create">Update Account Name</button>
         <button id="${account._id}" class="delete-button regressive">Delete Account</button>`;
       this.accountsDiv.appendChild(accountContainer);
     });
