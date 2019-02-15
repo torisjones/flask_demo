@@ -2,7 +2,9 @@
 
 Flask is a popular open source package for python that makes developing
 web applications quick and simple. This tutorial is an introduction to the
-framework and the development of RESTful web servers. 
+framework and the development of RESTful web servers. We will be integrating
+with Capital One's Nessie Api to serve our mock data. More information on 
+Nessie can be found at http://api.reimaginebanking.com/
 
 
 ### Setup
@@ -57,5 +59,12 @@ python3 server.py
 ```
 
 ## Basic Front End
+
+To run you will need npm. To install npm go to (https://www.npmjs.com/get-npm).
+
+1. Navigate to /BasicFront
+2. Run `npm install`
+3. Run `npm run start`
+4. Project should open a new window for you, if it does not, open a tab and go to `http://localhost:8050/`
 
 ## Account Management
