@@ -35,8 +35,6 @@ class FlaskDemoRoute extends HTMLElement {
   }
   __getCustomers(){
     this.api.getCall('/customers?key=6122e0b7dd9cf10ce7cb1135ac481e90').then((data)=>{
-      console.log('customers');
-      console.log(data);
       this.customerList = data;
     }).catch((error)=>{
       console.log(error);
@@ -77,17 +75,36 @@ class FlaskDemoRoute extends HTMLElement {
         this.__editCustomer(event.detail.id);
         break;
       case 'accounts':
+        this.__getAccounts(event.detail.id);
         break;
     }
     this.loadHomePage();
   }
   __editCustomer(id) {
     this.api.getCall(`/customers/${id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then((data)=>{
-      console.log('data');
-      console.log(data);
       this.__createCustomer(data);
     }).catch((error)=>{
       console.log(error);
+    });
+  }
+  __getAccounts(id) {
+    this.api.getCall(`/customers/${id}/accounts?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then((data)=>{
+      this.__viewAccounts(data);
+    }).catch((error)=>{
+      console.log(error);
+    });
+  }
+  __viewAccounts(accounts){
+    this.pageDiv.innerHTML = '<customer-accounts-page></customer-accounts-page>';
+    this.pageDiv.querySelector('customer-accounts-page').accounts = accounts;
+    this.pageDiv.querySelector('customer-accounts-page').addEventListener('back',this.loadHomePage.bind(this));
+    this.pageDiv.querySelector('customer-accounts-page').addEventListener('update-account',this.__updateAccount.bind(this));
+    this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__manageCustomers.bind(this));
+  }
+  __updateAccount(event){
+    this.api.putCall(`/accounts/${event.detail.id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,{nickname:event.detail.nickname})
+      .catch((error)=>{
+        console.log(error);
     });
   }
 }
