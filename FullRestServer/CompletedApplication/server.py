@@ -108,19 +108,19 @@ class Account(JsonRequest):
         return self._id
 
 
-@app.route("/customer", methods=["GET"])
+@app.route("/customers", methods=["GET"])
 def get_customer():
     return jsonify([cust.to_json() for i, cust in CUSTOMERS.items()])
 
 
-@app.route("/customer/<id>", methods=["GET"])
+@app.route("/customers/<id>", methods=["GET"])
 def get_customer_by_id(id):
     if id not in CUSTOMERS:
         return jsonify({"code": 404, "message": "This id does not exist in customers"})
     return jsonify(CUSTOMERS[id].to_json())
 
 
-@app.route("/customer/<id>", methods=["PUT"])
+@app.route("/customers/<id>", methods=["PUT"])
 def put_customer_by_id(id):
     if id not in CUSTOMERS:
         abort(404)
@@ -129,32 +129,52 @@ def put_customer_by_id(id):
     return jsonify({"code": 202, "message": "Accepted customer update"})
 
 
-@app.route("/customer", methods=["POST"])
+@app.route("/customers", methods=["POST"])
 def add_customer():
     new_customer = Customer(**request.json)
     CUSTOMERS[new_customer.get_id()] = new_customer
     return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()})
 
 
-@app.route("/customers/<id>/accounts", methods=["GET"])
-def get_accounts_by_customer(id):
-    if id not in CUSTOMERS:
+@app.route("/customers/<customer_id>/accounts", methods=["GET"])
+def get_accounts_by_customer(customer_id):
+    if customer_id not in CUSTOMERS:
         abort(400)
-    return jsonify([ACCOUNTS[account_id].to_json() for account_id in CUSTOMERS[id].accounts])
+    return jsonify([ACCOUNTS[account_id].to_json() for account_id in CUSTOMERS[customer_id].accounts])
 
 
-@app.route("/customers/<id>/account", methods=["POST"])
-def add_account(id):
+@app.route("/customers/<customer_id>/accounts", methods=["POST"])
+def add_account(customer_id):
     new_account = Account(**request.json)
-    if id not in CUSTOMERS:
+    if customer_id not in CUSTOMERS:
         abort(400)
-    new_account.customer_id = id
+    new_account.customer_id = customer_id
     ACCOUNTS[new_account.get_id()] = new_account
     CUSTOMERS[new_account.customer_id].add_account(new_account.get_id())
 
     return jsonify({"code": 201, "message": "Account created", "objectCreated": new_account.to_json()})
 
 
+@app.route("/customers/<account_id>/accounts", methods=["PUT"])
+def put_account(account_id):
+    if account_id not in ACCOUNTS:
+        abort(400)
+
+    account = ACCOUNTS[account_id]
+    account.update(new_values=request.json)
+
+    return jsonify({"code": 202, "message": "Accepted account update"})
+
+
+@app.route("/customers/<account_id>/accounts", methods=["DELETE"])
+def remove_account(account_id):
+    if account_id not in ACCOUNTS:
+        abort(400)
+    customer_id = ACCOUNTS[account_id].customer_id
+    CUSTOMERS[customer_id].remove_account(account_id)
+    del ACCOUNTS[account_id]
+
+    return ('', 204)
 
 
 if __name__ == "__main__":
