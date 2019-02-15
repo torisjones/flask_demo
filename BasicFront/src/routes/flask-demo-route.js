@@ -89,36 +89,45 @@ class FlaskDemoRoute extends HTMLElement {
   }
   __getAccounts(id) {
     this.api.getCall(`/customers/${id}/accounts?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then((data)=>{
-      this.__viewAccounts(data);
+      this.__viewAccounts(data,id);
     }).catch((error)=>{
       console.log(error);
     });
   }
-  __viewAccounts(accounts){
+  __viewAccounts(accounts,customerId){
     this.pageDiv.innerHTML = '<customer-accounts-page></customer-accounts-page>';
     this.pageDiv.querySelector('customer-accounts-page').accounts = accounts;
+    this.pageDiv.querySelector('customer-accounts-page').customerId = customerId;
     this.pageDiv.querySelector('customer-accounts-page').addEventListener('back',this.loadHomePage.bind(this));
     this.pageDiv.querySelector('customer-accounts-page').addEventListener('update-account',this.__updateAccount.bind(this));
     this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__manageCustomers.bind(this));
   }
   __updateAccount(event){
     console.log(event.detail);
-    let id = event.detail.id;
-    let nickname = event.detail.nickname;
+    let acctId = event.detail.acctId;
+    let custId = event.detail.custId;
+    let body = event.detail.body;
     switch(event.detail.type){
       case 'update':
-        this.api.putCall(`/accounts/${id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,{nickname:nickname})
+        this.api.putCall(`/accounts/${acctId}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,{nickname:body})
           .catch((error)=>{
             console.log(error);
           });
         break;
       case 'remove':
-        this.api.deleteCall(`/accounts/${id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then(()=>{
+        this.api.deleteCall(`/accounts/${acctId}?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then(()=>{
+          this.__getAccounts(custId);
         }).catch((error)=>{
+          this.__getAccounts(custId);
           console.log(error);
         });
         break;
       case 'create':
+        this.api.postCall(`/customers/${custId}/accounts?key=6122e0b7dd9cf10ce7cb1135ac481e90`,body).then(()=>{
+          this.__getAccounts(custId);
+        }).catch((error)=>{
+          console.log(error);
+        });
         break;
     }
   }
