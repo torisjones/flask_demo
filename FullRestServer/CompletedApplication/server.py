@@ -1,11 +1,29 @@
 from flask import Flask, request, jsonify, abort
 import uuid
 import hashlib
+from copy import copy
 from random import randint
 app = Flask(__name__)
 
 CUSTOMERS = dict()
 ACCOUNTS = dict()
+
+
+class DataFormatMisMatch(ValueError):
+    status_code = 400
+
+    def __init__(self, message, status_code=None, payload=None):
+        ValueError.__init__(self)
+        self.message = message
+        if status_code is not None:
+            self.status_code = status_code
+        self.payload = payload
+
+    def to_dict(self):
+        rv = dict(self.payload or ())
+        rv['message'] = self.message
+        rv['code'] = 400
+        return rv
 
 
 class JsonRequest(object):
@@ -20,30 +38,42 @@ class JsonRequest(object):
             else:
                 self.__dict__[key] = input_json[key]
 
-    def to_json(self):
-        return self.__parse_model(self.MODEL)
-
-    def __parse_model(self, model):
+    def to_json(self, model=None):
+        if model is None:
+            model = self.MODEL
         json_dict = dict()
         for key, value in model.items():
             if type(value) == dict:
-                json_dict[key] = self.__parse_model(model[key])
+                json_dict[key] = self.to_json(model[key])
             elif type(self.__dict__[key]) != value:
-                raise ValueError("Key {key} requires type {type} but type {actual} was found!".format(key=key,
+                raise DataFormatMisMatch("Key {key} requires type {type} but type {actual} was found!".format(key=key,
                                                                                                       type=value,
                                                                                                       actual=type(self.__dict__[key])))
             else:
                 json_dict[key] = self.__dict__[key]
         return json_dict
 
-
+    def validate(self, model=None):
+        if model is None:
+            model = self.MODEL
+        for key, value in model.items():
+            if type(value) == dict:
+                self.validate(model[key])
+            elif type(self.__dict__[key]) != value:
+                raise DataFormatMisMatch("Key {key} requires type {type} but type {actual} was found!".format(key=key,
+                                                                                                      type=value,
+                                                                                                      actual=type(self.__dict__[key])))
+            else:
+                # Passes Validation
+                pass
+        return
 
     def update(self, new_values, model=None):
         if model is None:
             model = self.MODEL
         for key, value in new_values.items():
             if model.get(key) is None:
-                raise ValueError("Key {key} not found in model!".format(key=key))
+                raise DataFormatMisMatch("Key {key} not found in model!".format(key=key))
             if type(value) == dict:
                 self.update(value, model[key])
             else:
@@ -111,6 +141,13 @@ class Account(JsonRequest):
         return self._id
 
 
+@app.errorhandler(DataFormatMisMatch)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
+
+
 @app.route("/customers", methods=["GET"])
 def get_customer():
     return jsonify([cust.to_json() for i, cust in CUSTOMERS.items()])
@@ -127,14 +164,17 @@ def get_customer_by_id(id):
 def put_customer_by_id(id):
     if id not in CUSTOMERS:
         return (jsonify({"code": 404, "message": "This id does not exist in customers"}), 404)
-    customer = CUSTOMERS[id]
+    customer = copy(CUSTOMERS[id])
     customer.update(new_values=request.json)
+    customer.validate()
+    CUSTOMERS[id] = customer
     return jsonify({"code": 202, "message": "Accepted customer update"})
 
 
 @app.route("/customers", methods=["POST"])
 def add_customer():
     new_customer = Customer(**request.json)
+    new_customer.validate()
     CUSTOMERS[new_customer.get_id()] = new_customer
     return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()})
 
@@ -153,6 +193,7 @@ def add_account(customer_id):
 
     new_account = Account(**request.json)
     new_account.customer_id = customer_id
+    new_account.validate()
     ACCOUNTS[new_account.get_id()] = new_account
     CUSTOMERS[new_account.customer_id].add_account(new_account.get_id())
 
@@ -164,9 +205,10 @@ def put_account(account_id):
     if account_id not in ACCOUNTS:
         return (jsonify({"code": 404, "message": "This id does not exist in accounts"}), 404)
 
-    account = ACCOUNTS[account_id]
+    account = copy(ACCOUNTS[account_id])
     account.update(new_values=request.json)
-
+    account.validate()
+    ACCOUNTS[account_id] = account
     return jsonify({"code": 202, "message": "Accepted account update"})
 
 
