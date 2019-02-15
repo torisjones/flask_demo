@@ -116,7 +116,8 @@ class FlaskDemoRoute extends HTMLElement {
     this.api = new NessieApi();
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style></style><h1>Nessie Flask!</h1><div id="pageDiv"><button id="newCustomer">New Customer</button><br><button id="manageCustomers">Manage Customers</button></div>`;
+    this._shadowRoot.innerHTML = `<style>button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}
+</style><h1>Nessie Flask!</h1><div id="pageDiv"><button id="newCustomer" class="create">New Customer</button><br><button id="manageCustomers" class="manage">Manage Customers</button></div>`;
     this.pageDiv = this._shadowRoot.querySelector('#pageDiv');
     this.__getCustomers();
     this.__addEventListeners();
@@ -137,9 +138,9 @@ class FlaskDemoRoute extends HTMLElement {
     this.manageCustomersButton.addEventListener('click',this.__manageCustomers.bind(this));
   }
   loadHomePage(){
-    this.pageDiv.innerHTML = '<button id="newCustomer">New Customer</button>\n' +
+    this.pageDiv.innerHTML = '<button id="newCustomer" class="create">New Customer</button>\n' +
       '  <br>\n' +
-      '  <button id="manageCustomers">Manage Customers</button>';
+      '  <button id="manageCustomers" class="manage">Manage Customers</button>';
     this.__addEventListeners();
   }
   __getCustomers(){
@@ -258,8 +259,8 @@ class CreateCustomer extends HTMLElement {
     };
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style>.label{width:100px;padding-top:10px}
-</style><h3>Customer DetailsPage!</h3><div class="label">First Name:</div><input id="firstName"/><br><div class="label">Last Name:</div><input id="lastName"/><br><div class="label">Street Number:</div><input id="streetNumber"/><br><div class="label">Street Name:</div><input id="streetName"/><br><div class="label">City:</div><input id="city"/><br><div class="label">State:</div><input id="state"/><br><div class="label">Zip:</div><input id="zip"/><br><div class="horizontal-div"><button id="back">Home</button><button id="create">Save</button></div>`;
+    this._shadowRoot.innerHTML = `<style>.label{width:100px;padding-top:10px}button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}
+</style><h3>Customer DetailsPage!</h3><div class="label">First Name:</div><input id="firstName"/><br><div class="label">Last Name:</div><input id="lastName"/><br><div class="label">Street Number:</div><input id="streetNumber"/><br><div class="label">Street Name:</div><input id="streetName"/><br><div class="label">City:</div><input id="city"/><br><div class="label">State:</div><input id="state"/><br><div class="label">Zip:</div><input id="zip"/><br><div class="horizontal-div"><button id="back" class="neutral-button">Home</button><button id="create" class="create">Save</button></div>`;
     this.firstName = this._shadowRoot.querySelector('#firstName');
     this.lastName = this._shadowRoot.querySelector('#lastName');
     this.streetNumber = this._shadowRoot.querySelector('#streetNumber');
@@ -321,7 +322,6 @@ class CreateCustomer extends HTMLElement {
         break;
       case 'zip':
         this.newCustomer.address.zip = event.currentTarget.value;
-        break;
     }
   }
   loadData(){
@@ -350,8 +350,8 @@ class ManageCustomers extends HTMLElement {
     this._shadowRoot = this.attachShadow({mode: 'open'});
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style>.container{padding-bottom:20px}
-</style><h3>Manage Customers Page!</h3><div id="customerDiv"></div><div class="horizontal-div"><button id="back">Home</button></div>`;
+    this._shadowRoot.innerHTML = `<style>.container{padding-bottom:20px}button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}
+</style><h3>Manage Customers Page!</h3><div id="customerDiv"></div><div class="horizontal-div"><button id="back" class="neutral-button">Home</button></div>`;
     this.backButton = this._shadowRoot.querySelector('#back');
     this.customerDiv = this._shadowRoot.querySelector('#customerDiv');
     this.__addEventListeners();
@@ -373,7 +373,9 @@ class ManageCustomers extends HTMLElement {
   }
   set customers(_value){
     this._customers = _value;
-    this.__buildCustomers();
+    if(_value){
+      this.__buildCustomers();
+    }
   }
   __buildCustomers(){
     this.customers.forEach((customer)=>{
@@ -382,8 +384,8 @@ class ManageCustomers extends HTMLElement {
       customerContainer.innerHTML = `<div class='name'>${customer.first_name} ${customer.last_name}</div>
         <div class="addressLine1">${customer.address.street_number} ${customer.address.street_name}</div>
         <div class="addressLine2">${customer.address.city}, ${customer.address.state} ${customer.address.zip}</div>
-        <button id="${customer._id}" class="edit-button">Edit Customer Details</button>
-        <button id="${customer._id}" class="accounts">View Customer Accounts</button>`;
+        <button id="${customer._id}" class="edit-button create">Edit Customer Details</button>
+        <button id="${customer._id}" class="accounts manage">View Customer Accounts</button>`;
       this.customerDiv.appendChild(customerContainer);
     });
     this.customerDiv.querySelectorAll('.edit-button').forEach((button)=>{
@@ -418,8 +420,8 @@ class CustomerAccountsPage extends HTMLElement {
     this._shadowRoot = this.attachShadow({mode: 'open'});
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style>.container{padding-bottom:20px}.horizontal-div{display:flex}.label{padding-right:20px;width:70px}.hidden{display:none}
-</style><h3>Customer Accounts!</h3><div id="manageAccounts"><button id="createAccount">Create Account</button><div id="accounts"></div><div class="horizontal-div"><button id="customers">Back to Manage Customers</button></div></div><div id="createAccountDiv" class="hidden"><div class="horizontal-div"><div class="label">Nickname:</div><div class='name'><input id="nickname"/></div></div><div class="horizontal-div"><div class="label">Type:</div><div class="type"><input id="type"/></div></div><div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards"><input id="rewards"/></div></div><div class="horizontal-div"><div class="label">Balance:</div><div class="balance"><input id="balance"/></div></div><button class="backAccountButton">Back to Accounts</button><button class="create-button">Create Account</button></div>`;
+    this._shadowRoot.innerHTML = `<style>.container{padding-bottom:20px}.horizontal-div{display:flex}.label{padding-right:20px;width:70px}.hidden{display:none}button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}
+</style><h3>Customer Accounts!</h3><div id="manageAccounts"><button id="createAccount" class="create">Create Account</button><div id="accounts"></div><div class="horizontal-div"><button id="customers" class="manage">Back to Manage Customers</button></div></div><div id="createAccountDiv" class="hidden"><div class="horizontal-div"><div class="label">Nickname:</div><div class='name'><input id="nickname"/></div></div><div class="horizontal-div"><div class="label">Type:</div><div class="type"><input id="type"/></div></div><div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards"><input id="rewards"/></div></div><div class="horizontal-div"><div class="label">Balance:</div><div class="balance"><input id="balance"/></div></div><button class="backAccountButton" class="manage">Back to Accounts</button><button class="create-button" class="create">Create Account</button></div>`;
     // this.backButton = this._shadowRoot.querySelector('#back');
     this.accountsDiv = this._shadowRoot.querySelector('#accounts');
     this.customerButton = this._shadowRoot.querySelector('#customers');
@@ -468,8 +470,8 @@ class CustomerAccountsPage extends HTMLElement {
         <div class="horizontal-div"><div class="label">Type:</div><div class="type">${account.type}</div></div>
         <div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards">${account.rewards}</div></div>
         <div class="horizontal-div"><div class="label">Balance:</div><div class="balance">${account.balance}</div></div>
-        <button id="${account._id}" class="save-button">Update Account Name</button>
-        <button id="${account._id}" class="delete-button">Delete Account</button>`;
+        <button id="${account._id}" class="save-button create">Update Account Name</button>
+        <button id="${account._id}" class="delete-button regressive">Delete Account</button>`;
       this.accountsDiv.appendChild(accountContainer);
     });
     this.accountsDiv.querySelectorAll('.save-button').forEach((button)=>{

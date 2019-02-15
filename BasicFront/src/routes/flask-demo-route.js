@@ -28,9 +28,9 @@ class FlaskDemoRoute extends HTMLElement {
     this.manageCustomersButton.addEventListener('click',this.__manageCustomers.bind(this));
   }
   loadHomePage(){
-    this.pageDiv.innerHTML = '<button id="newCustomer">New Customer</button>\n' +
+    this.pageDiv.innerHTML = '<button id="newCustomer" class="create">New Customer</button>\n' +
       '  <br>\n' +
-      '  <button id="manageCustomers">Manage Customers</button>';
+      '  <button id="manageCustomers" class="manage">Manage Customers</button>';
     this.__addEventListeners();
   }
   __getCustomers(){
