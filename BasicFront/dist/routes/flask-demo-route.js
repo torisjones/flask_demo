@@ -102,10 +102,25 @@ class FlaskDemoRoute extends HTMLElement {
     this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__manageCustomers.bind(this));
   }
   __updateAccount(event){
-    this.api.putCall(`/accounts/${event.detail.id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,{nickname:event.detail.nickname})
-      .catch((error)=>{
-        console.log(error);
-    });
+    console.log(event.detail);
+    let id = event.detail.id;
+    let nickname = event.detail.nickname;
+    switch(event.detail.type){
+      case 'update':
+        this.api.putCall(`/accounts/${id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,{nickname:nickname})
+          .catch((error)=>{
+            console.log(error);
+          });
+        break;
+      case 'remove':
+        this.api.deleteCall(`/accounts/${id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then(()=>{
+        }).catch((error)=>{
+          console.log(error);
+        });
+        break;
+      case 'create':
+        break;
+    }
   }
 }
 if(!customElements.get('flask-demo-route')){

@@ -1,6 +1,18 @@
 <h3>Customer Accounts!</h3>
-<div id="accounts"></div>
-<div class="horizontal-div">
-  <button id="customers">Manage Customers</button>
-  <button id="back">Home</button>
+<div id="manageAccounts">
+  <button id="createAccount">Create Account</button>
+  <div id="accounts"></div>
+  <div class="horizontal-div">
+    <button id="customers">Manage Customers</button>
+    <button id="back">Home</button>
+  </div>
+</div>
+
+<div id="createAccountDiv" class="hidden">
+  <div class="horizontal-div"><div class="label">Nickname:</div><div class='name'><input id="nickname"  /></div></div>
+  <div class="horizontal-div"><div class="label">Type:</div><div class="type"><input id="type"  /></div></div>
+  <div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards"><input id="rewards"  /></div></div>
+  <div class="horizontal-div"><div class="label">Balance:</div><div class="balance"><input id="balance"  /></div></div>
+  <button class="back-button">Back to Accounts</button>
+  <button class="save-button">Create Account</button>
 </div>
