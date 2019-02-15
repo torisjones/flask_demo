@@ -156,15 +156,11 @@ class FlaskDemoRoute extends HTMLElement {
     this.pageDiv.querySelector('create-customer').addEventListener('create-customer',this.createCustomerCall.bind(this));
   }
   createCustomerCall(event){
-    console.log('inside create customer on route');
-    console.log(event.detail);
     if(event.detail._id){
-      console.log('inside make put call');
       this.api.putCall(`/customers/${event.detail.id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,event.detail.address).catch((error)=>{
         console.log(error);
       });
     } else {
-      console.log('inside make post call');
       this.api.postCall('/customers?key=6122e0b7dd9cf10ce7cb1135ac481e90',event.detail).then(()=>{
         this.__getCustomers();
       }).catch((error)=>{
@@ -180,9 +176,6 @@ class FlaskDemoRoute extends HTMLElement {
     this.pageDiv.querySelector('manage-customers').addEventListener('manage-customers',this.manageCustomersCall.bind(this));
   }
   manageCustomersCall(event){
-    console.log('inside manage customer on route');
-    console.log(event.detail);
-    // TODO: actually make call to flask app
     switch (event.detail.type) {
       case 'edit':
         this.__editCustomer(event.detail.id);
@@ -216,7 +209,6 @@ class FlaskDemoRoute extends HTMLElement {
     this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__manageCustomers.bind(this));
   }
   __updateAccount(event){
-    console.log(event.detail);
     let acctId = event.detail.acctId;
     let custId = event.detail.custId;
     let body = event.detail.body;
