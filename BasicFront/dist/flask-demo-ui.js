@@ -211,10 +211,25 @@ class FlaskDemoRoute extends HTMLElement {
     this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__manageCustomers.bind(this));
   }
   __updateAccount(event){
-    this.api.putCall(`/accounts/${event.detail.id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,{nickname:event.detail.nickname})
-      .catch((error)=>{
-        console.log(error);
-    });
+    console.log(event.detail);
+    let id = event.detail.id;
+    let nickname = event.detail.nickname;
+    switch(event.detail.type){
+      case 'update':
+        this.api.putCall(`/accounts/${id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`,{nickname:nickname})
+          .catch((error)=>{
+            console.log(error);
+          });
+        break;
+      case 'remove':
+        this.api.deleteCall(`/accounts/${id}?key=6122e0b7dd9cf10ce7cb1135ac481e90`).then(()=>{
+        }).catch((error)=>{
+          console.log(error);
+        });
+        break;
+      case 'create':
+        break;
+    }
   }
 }
 if(!customElements.get('flask-demo-route')){
@@ -406,11 +421,14 @@ class CustomerAccountsPage extends HTMLElement {
     this._shadowRoot = this.attachShadow({mode: 'open'});
   }
   connectedCallback(){
-    this._shadowRoot.innerHTML = `<style>.container{padding-bottom:20px}.horizontal-div{display:flex}.label{padding-right:20px;width:70px}
-</style><h3>Customer Accounts!</h3><div id="accounts"></div><div class="horizontal-div"><button id="customers">Manage Customers</button><button id="back">Home</button></div>`;
+    this._shadowRoot.innerHTML = `<style>.container{padding-bottom:20px}.horizontal-div{display:flex}.label{padding-right:20px;width:70px}.hidden{display:none}
+</style><h3>Customer Accounts!</h3><div id="manageAccounts"><button id="createAccount">Create Account</button><div id="accounts"></div><div class="horizontal-div"><button id="customers">Manage Customers</button><button id="back">Home</button></div></div><div id="createAccountDiv" class="hidden"><div class="horizontal-div"><div class="label">Nickname:</div><div class='name'><input id="nickname"/></div></div><div class="horizontal-div"><div class="label">Type:</div><div class="type"><input id="type"/></div></div><div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards"><input id="rewards"/></div></div><div class="horizontal-div"><div class="label">Balance:</div><div class="balance"><input id="balance"/></div></div><button class="back-button">Back to Accounts</button><button class="save-button">Create Account</button></div>`;
     this.backButton = this._shadowRoot.querySelector('#back');
     this.accountsDiv = this._shadowRoot.querySelector('#accounts');
     this.customerButton = this._shadowRoot.querySelector('#customers');
+    this.createAccountDiv = this._shadowRoot.querySelector('#createAccountDiv');
+    this.createAccountButton = this._shadowRoot.querySelector('#createAccount');
+    this.manageAccountsDiv = this._shadowRoot.querySelector('#manageAccounts');
     this.__addEventListeners();
   }
   disconnectedCallback(){
@@ -425,6 +443,7 @@ class CustomerAccountsPage extends HTMLElement {
   __addEventListeners(){
     this.backButton.addEventListener('click',this.back.bind(this));
     this.customerButton.addEventListener('click',this.manageCustomers.bind(this));
+    this.createAccountButton.addEventListener('click',this.__viewCreateAccount.bind(this));
   }
   get accounts() {
     return this._accounts;
@@ -432,6 +451,12 @@ class CustomerAccountsPage extends HTMLElement {
   set accounts(_value){
     this._accounts = _value;
     this.loadData();
+  }
+  get customerId() {
+    return this._customerId;
+  }
+  set customerId(_value){
+    this._customerId = _value;
   }
   loadData(){
     this.accounts.forEach((account)=>{
@@ -442,15 +467,23 @@ class CustomerAccountsPage extends HTMLElement {
         <div class="horizontal-div"><div class="label">Type:</div><div class="type">${account.type}</div></div>
         <div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards">${account.rewards}</div></div>
         <div class="horizontal-div"><div class="label">Balance:</div><div class="balance">${account.balance}</div></div>
-        <button id="${account._id}" class="save-button">Update Account Name</button>`;
+        <button id="${account._id}" class="save-button">Update Account Name</button>
+        <button id="${account._id}" class="delete-button">Delete Account</button>`;
       this.accountsDiv.appendChild(accountContainer);
     });
     this.accountsDiv.querySelectorAll('.save-button').forEach((button)=>{
       button.addEventListener('click',this.__emitUpdateEvent.bind(this));
     });
+    this.accountsDiv.querySelectorAll('.delete-button').forEach((button)=>{
+      button.addEventListener('click',this.__emitRemoveEvent.bind(this));
+    });
     if(this.accounts.length === 0){
       this.accountsDiv.innerHTML = 'No accounts yet.';
     }
+  }
+  __viewCreateAccount(){
+    this.manageAccountsDiv.setAttribute('class','hidden');
+    this.createAccountDiv.removeAttribute('class');
   }
   back(){
     this.dispatchEvent(new CustomEvent('back'));
@@ -461,7 +494,11 @@ class CustomerAccountsPage extends HTMLElement {
   __emitUpdateEvent(event){
     let id = event.currentTarget.getAttribute('id');
     let nickname = this.accountsDiv.querySelector(`input[data="${id}"]`).value;
-    this.dispatchEvent(new CustomEvent('update-account',{detail:{id:id, nickname:nickname}}));
+    this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'update',id:id, nickname:nickname}}));
+  }
+  __emitRemoveEvent(event){
+    let id = event.currentTarget.getAttribute('id');
+    this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'remove',id:id}}));
   }
 }
 if(!customElements.get('customer-accounts-page')){
