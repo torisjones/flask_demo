@@ -5,12 +5,14 @@ class CustomerAccountsPage extends HTMLElement {
   }
   connectedCallback(){
     this._shadowRoot.innerHTML = tempHtml;
-    this.backButton = this._shadowRoot.querySelector('#back');
+    // this.backButton = this._shadowRoot.querySelector('#back');
     this.accountsDiv = this._shadowRoot.querySelector('#accounts');
     this.customerButton = this._shadowRoot.querySelector('#customers');
     this.createAccountDiv = this._shadowRoot.querySelector('#createAccountDiv');
     this.createAccountButton = this._shadowRoot.querySelector('#createAccount');
     this.manageAccountsDiv = this._shadowRoot.querySelector('#manageAccounts');
+    this.createButton = this._shadowRoot.querySelector('.create-button');
+    this.backAccountButton = this._shadowRoot.querySelector('.backAccountButton');
     this.__addEventListeners();
   }
   disconnectedCallback(){
@@ -23,9 +25,11 @@ class CustomerAccountsPage extends HTMLElement {
 
   }
   __addEventListeners(){
-    this.backButton.addEventListener('click',this.back.bind(this));
+    // this.backButton.addEventListener('click',this.back.bind(this));
+    this.backAccountButton.addEventListener('click',this.__viewManageAccounts.bind(this))
     this.customerButton.addEventListener('click',this.manageCustomers.bind(this));
     this.createAccountButton.addEventListener('click',this.__viewCreateAccount.bind(this));
+    this.createButton.addEventListener('click',this.__createAccount.bind(this));
   }
   get accounts() {
     return this._accounts;
@@ -63,9 +67,30 @@ class CustomerAccountsPage extends HTMLElement {
       this.accountsDiv.innerHTML = 'No accounts yet.';
     }
   }
+  __clearData(){
+    this.createAccountDiv.querySelectorAll('input').forEach((input)=>{
+      input.value = '';
+    });
+  }
+  __createAccount(){
+    let body = {};
+    this.createAccountDiv.querySelectorAll('input').forEach((input)=>{
+      input.getAttribute('id') !== 'balance' && input.getAttribute('id') !== 'rewards' ?
+        body[input.getAttribute('id')] = input.value :
+        body[input.getAttribute('id')] = parseInt(input.value);
+    });
+    console.log(body);
+    this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'create',custId:this.customerId,body:body}}));
+    this.__clearData();
+  }
   __viewCreateAccount(){
     this.manageAccountsDiv.setAttribute('class','hidden');
     this.createAccountDiv.removeAttribute('class');
+  }
+  __viewManageAccounts(){
+    this.createAccountDiv.setAttribute('class','hidden');
+    this.manageAccountsDiv.removeAttribute('class');
+    this.__clearData();
   }
   back(){
     this.dispatchEvent(new CustomEvent('back'));
@@ -76,11 +101,11 @@ class CustomerAccountsPage extends HTMLElement {
   __emitUpdateEvent(event){
     let id = event.currentTarget.getAttribute('id');
     let nickname = this.accountsDiv.querySelector(`input[data="${id}"]`).value;
-    this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'update',id:id, nickname:nickname}}));
+    this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'update',acctId:id, body:nickname}}));
   }
   __emitRemoveEvent(event){
     let id = event.currentTarget.getAttribute('id');
-    this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'remove',id:id}}));
+    this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'remove',acctId:id,custId:this.customerId}}));
   }
 }
 if(!customElements.get('customer-accounts-page')){
