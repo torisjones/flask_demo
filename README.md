@@ -287,7 +287,8 @@ def put_customer_by_id(customer_id):                              # Path variabl
 Add this function under the comment `Route 4.`
 
 
-
+#### Creating the Account Endpoints
+First, let's create the endpoints needed for getting (GET), creating (POST), modifying (PUT) and deleting (DELETE) accounts.  
 
 ##### Route 5: Getting all Accounts that belong to a Customer: GET 
 We will be getting all accounts that belong to a specified customer ACCOUNTS database from the `/customers/<customer_id>/accounts` route. The method will need to a return
@@ -339,7 +340,7 @@ def add_account(customer_id):
     ACCOUNTS[new_account.get_id()] = new_account
     CUSTOMERS[new_account.customer_id].add_account(new_account.get_id())
 
-    return jsonify({"code": 201, "message": "Account created", "objectCreated": new_account.to_json()})
+    return jsonify({"code": 201, "message": "Account created", "objectCreated": new_account.to_json()}), 201
 ```
 Add this function under the comment `Route 6.`
 
