@@ -52,8 +52,10 @@ class CreateCustomer extends HTMLElement {
   }
   set data(_value){
     this._data = _value;
-    this.newCustomer = _value;
-    this.loadData();
+    if(_value){
+      this.newCustomer = _value;
+      this.loadData();
+    }
   }
   updateCustomer(event){
     if(this.newCustomer){
@@ -94,8 +96,6 @@ class CreateCustomer extends HTMLElement {
     this.dispatchEvent(new CustomEvent('back'));
   }
   __emitUpdateEvent(){
-    console.log('here');
-    console.log(this.newCustomer);
     this.dispatchEvent(new CustomEvent('create-customer',{detail:this.newCustomer}));
   }
 }
