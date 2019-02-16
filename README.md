@@ -344,6 +344,43 @@ def add_account(customer_id):
 ```
 Add this function under the comment `Route 6.`
 
+##### Route 7: Modifying existing Customer: PUT
+Another feature of the Account API is allowing a client to modify an existing entry. Instead of deleting and recreating 
+an account every time data changes, we can modify the object in place. This method is a combination of both the get and create 
+user functions.
+
+Using the same path from route 6, we change the method to a `PUT`. 
+
+The initial part of the function starts out the same as the GET endpoint, verifying that an account is in the database before proceeding with 
+modifying the object.
+
+Once we have confirmed it exists, we want to modify the object. However, we do not want to modify the actual object before we
+confirm that the data entered is valid. To achieve this, we will 
+1. Clone the Account object
+2. Update the data 
+3. Validate that the data is still valid and if it is, save it back to the same key in the database
+4. Return a 202 code
+
+Using the `copy()` function, we can create a copy of the Account object. Then we will call the `.update(new_json)` method in the 
+Account object to update the relevant fields. The `.validate()` method will then validate that the Account contains valid data and finally, 
+we will save it back to dictionary with the same Account Id. 
+
+Putting it all together, the function looks like this:
+```python
+@app.route("/accounts/<account_id>", methods=["PUT"])
+def put_account(account_id):
+    if account_id not in ACCOUNTS:
+        return jsonify({"code": 404, "message": "This id does not exist in accounts"}), 404
+    account = copy(ACCOUNTS[account_id])
+    account.update(new_values=request.json)
+    account.validate()
+    ACCOUNTS[account_id] = account
+    return jsonify({"code": 202, "message": "Accepted account update"}), 202
+```
+
+Add this function under the comment `Route 7.`
+
+
 ##### Route 8: Deleting an Account: DELETE
 The purpose of this route is to delete entries in the account database. To delete an entry, we will need to validate the incoming request to ensure the path contains a valid account_id parameter, and return a 204 status code (No Content). 
 
