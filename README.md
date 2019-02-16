@@ -402,6 +402,8 @@ Add this function under the comment `Route 8.`
 ### Basic Front End
 A basic front end is also included with this example that hits the endpoints defined in the banking tutorial. 
 
+The flask-demo-ui is included in the project only for reference on how to build web components, the FullRestServer/CompletedApplication will actually serve the compiled js for the web components library from the static directory for you.
+
 To run the front end, you will need to install npm. To install npm go to (https://www.npmjs.com/get-npm) and follow the instructions.
 
 1. Navigate to /BasicFront
