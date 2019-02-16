@@ -24,23 +24,29 @@ class FlaskDemoRoute extends HTMLElement {
   }
   __addEventListeners(){
   }
+  
+  //--------------------------------------------------------------------------------------------------------------------
+  // api calls ---------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
+  // Customer endpoints
   __getCustomers(){
     this.api.getCall('/customers').then((data)=>{
       this.customerList = data;
-      this.__manageCustomers();
+      this.__loadManageCustomersPage();
     }).catch((error)=>{
       console.log(error);
       this.errorDiv.innerHTML = JSON.stringify(error);
     });
   }
-  __createCustomer(customer){
-    this.pageDiv.innerHTML = '<create-customer></create-customer>';
-    this.errorDiv.innerHTML = '';
-    if(customer && customer.address){this.pageDiv.querySelector('create-customer').data = customer; }
-    this.pageDiv.querySelector('create-customer').addEventListener('back',this.__getCustomers.bind(this));
-    this.pageDiv.querySelector('create-customer').addEventListener('create-customer',this.createCustomerCall.bind(this));
+  __getCustomerById(id) {
+    this.api.getCall(`/customers/${id}`).then((data)=>{
+      this.__loadCreateCustomerPage(data);
+    }).catch((error)=>{
+      console.log(error);
+      this.errorDiv.innerHTML = JSON.stringify(error);
+    });
   }
-  createCustomerCall(event){
+  __updateCustomer(event){
     if(event.detail._id){
       this.api.putCall(`/customers/${event.detail._id}`,event.detail).then(()=>{
         this.__getCustomers();
@@ -57,49 +63,16 @@ class FlaskDemoRoute extends HTMLElement {
       });
     }
   }
-  __manageCustomers(){
-    this.pageDiv.innerHTML = '<manage-customers></manage-customers>';
-    this.errorDiv.innerHTML = '';
-    this.pageDiv.querySelector('manage-customers').customers = this.customerList;
-    this.pageDiv.querySelector('manage-customers').addEventListener('manage-customers',this.manageCustomersCall.bind(this));
-  }
-  manageCustomersCall(event){
-    switch (event.detail.type) {
-      case 'edit':
-        this.__editCustomer(event.detail.id);
-        break;
-      case 'accounts':
-        this.__getAccounts(event.detail.id);
-        break;
-      case 'create':
-        this.__createCustomer();
-        break;
-    }
-  }
-  __editCustomer(id) {
-    this.api.getCall(`/customers/${id}`).then((data)=>{
-      this.__createCustomer(data);
-    }).catch((error)=>{
-      console.log(error);
-      this.errorDiv.innerHTML = JSON.stringify(error);
-    });
-  }
+  
+  // Account Endpoints
   __getAccounts(id) {
-    this.__viewAccounts();
+    this.__loadAccountsPage();
     this.api.getCall(`/customers/${id}/accounts`).then((data)=>{
-      this.__viewAccounts(data,id);
+      this.__loadAccountsPage(data,id);
     }).catch((error)=>{
       console.log(error);
       this.errorDiv.innerHTML = JSON.stringify(error);
     });
-  }
-  __viewAccounts(accounts,customerId){
-    this.pageDiv.innerHTML = '<customer-accounts-page></customer-accounts-page>';
-    this.errorDiv.innerHTML = '';
-    this.pageDiv.querySelector('customer-accounts-page').accounts = accounts;
-    this.pageDiv.querySelector('customer-accounts-page').customerId = customerId;
-    this.pageDiv.querySelector('customer-accounts-page').addEventListener('update-account',this.__updateAccount.bind(this));
-    this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__getCustomers.bind(this));
   }
   __updateAccount(event){
     let acctId = event.detail.acctId;
@@ -131,6 +104,44 @@ class FlaskDemoRoute extends HTMLElement {
         });
         break;
     }
+  }
+
+  //--------------------------------------------------------------------------------------------------------------------
+  // routing functions -------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
+  __loadCreateCustomerPage(customer){
+    this.pageDiv.innerHTML = '<create-customer></create-customer>';
+    this.errorDiv.innerHTML = '';
+    if(customer && customer.address){this.pageDiv.querySelector('create-customer').data = customer; }
+    this.pageDiv.querySelector('create-customer').addEventListener('back',this.__getCustomers.bind(this));
+    this.pageDiv.querySelector('create-customer').addEventListener('create-customer',this.__updateCustomer.bind(this));
+  }
+  __loadManageCustomersPage(){
+    this.pageDiv.innerHTML = '<manage-customers></manage-customers>';
+    this.errorDiv.innerHTML = '';
+    this.pageDiv.querySelector('manage-customers').customers = this.customerList;
+    this.pageDiv.querySelector('manage-customers').addEventListener('manage-customers',this.manageCustomersCall.bind(this));
+  }
+  manageCustomersCall(event){
+    switch (event.detail.type) {
+      case 'edit':
+        this.__getCustomerById(event.detail.id);
+        break;
+      case 'accounts':
+        this.__getAccounts(event.detail.id);
+        break;
+      case 'create':
+        this.__loadCreateCustomerPage();
+        break;
+    }
+  }
+  __loadAccountsPage(accounts,customerId){
+    this.pageDiv.innerHTML = '<customer-accounts-page></customer-accounts-page>';
+    this.errorDiv.innerHTML = '';
+    this.pageDiv.querySelector('customer-accounts-page').accounts = accounts;
+    this.pageDiv.querySelector('customer-accounts-page').customerId = customerId;
+    this.pageDiv.querySelector('customer-accounts-page').addEventListener('update-account',this.__updateAccount.bind(this));
+    this.pageDiv.querySelector('customer-accounts-page').addEventListener('customers',this.__getCustomers.bind(this));
   }
 }
 if(!customElements.get('flask-demo-route')){
