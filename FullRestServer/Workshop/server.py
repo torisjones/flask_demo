@@ -1,10 +1,9 @@
-from flask import Flask, request, jsonify, abort
+from flask import Flask, request, jsonify, send_from_directory
 import uuid
 import hashlib
 from copy import copy
 from random import randint
 app = Flask(__name__)
-
 
 # Databases
 
@@ -126,15 +125,17 @@ class Customer(JsonRequest):
         }
     }
 
-    def __init__(self, first_name, last_name, address):
+    def __init__(self, first_name=None, last_name=None, address=None):
+        if address is None:
+            address = dict()
         self._id = hashlib.md5(str(uuid.uuid4()).encode()).digest().hex()
         self.first_name = first_name
         self.last_name = last_name
-        self.street_number = address['street_number']
-        self.street_name = address['street_name']
-        self.city = address['city']
-        self.state = address['state']
-        self.zip = address['zip']
+        self.street_number = address.get('street_number')
+        self.street_name = address.get('street_name')
+        self.city = address.get('city')
+        self.state = address.get('state')
+        self.zip = address.get('zip')
 
         # For database lookup
         self.accounts = []
@@ -163,7 +164,7 @@ class Account(JsonRequest):
         "customer_id": str
     }
 
-    def __init__(self, type, account_number=None, customer_id=None, nickname=None, rewards=0, balance=0):
+    def __init__(self, type=None, account_number=None, customer_id=None, nickname=None, rewards=0, balance=0):
         self.type = type
         self.account_number = ''.join(["{0}".format(randint(0, 9)) for num in range(0, 16)]) if account_number is None else account_number
         self.customer_id = customer_id
@@ -187,12 +188,11 @@ def handle_invalid_usage(error):
     response.status_code = error.status_code
     return response
 
+# Route 1: POST Customer to the /customers endpoint
 
-# Route 1: GET all Customers from the /customers endpoint
+# Route 2: GET all Customers from the /customers endpoint
 
-# Route 2: GET Customer by customer ID from the /customers/<id> endpoint
-
-# Route 3: POST Customer to the /customers endpoint
+# Route 3: GET Customer by customer ID from the /customers/<id> endpoint
 
 # Route 4: PUT Customer by customer ID from the /customers/<id> endpoint
 
@@ -204,6 +204,13 @@ def handle_invalid_usage(error):
 
 # Route 8: DELETE Account by account id to the /accounts/<account_id> endpoint
 
+# Serves front end JS from python
+@app.route('/', methods=["GET"])
+def serve_home_page():
+    return send_from_directory(app.config['STATIC_CONTENT_DIRECTORY'], "index.html")
+
 
 if __name__ == "__main__":
+    app.config['STATIC_CONTENT_DIRECTORY'] = os.path.dirname(os.path.abspath(__file__)) + "/static/"
     app.run()
+
