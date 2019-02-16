@@ -236,7 +236,7 @@ and the value as the Customer object.
 
 Finally, we need to add the new account to the corresponding customer in the customer database, utilizing the customer_id and account_id.
 
-```
+```python
 @app.route("/customers/<customer_id>/accounts", methods=["POST"])
 def add_account(customer_id):
     if customer_id not in CUSTOMERS:
@@ -257,7 +257,7 @@ The purpose of this route is to delete entries in the account database. To delet
 
 Let's start out by building the function. First we need to ensure that the account_id is a valid id that belongs to an existing account. If the account_id is not associated with an account, we should return a `404` denoting that the account was not found. The second thing we will need to do is remove the account from the corresponding customer object in the CUSTOMER database. Finally, we will delete the account from the ACCOUNTS database.
 
-```
+```python
 @app.route("/accounts/<account_id>", methods=["DELETE"])
 def remove_account(account_id):
     if account_id not in ACCOUNTS:
