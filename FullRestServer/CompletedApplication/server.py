@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
+import os
 import uuid
 import hashlib
 from copy import copy
@@ -271,5 +272,12 @@ def remove_account(account_id):
     return ('', 204)
 
 
+# Serves front end JS from python
+@app.route('/', methods=["GET"])
+def serve_home_page():
+    return send_from_directory(app.config['STATIC_CONTENT_DIRECTORY'], "index.html")
+
+
 if __name__ == "__main__":
+    app.config['STATIC_CONTENT_DIRECTORY'] = os.path.dirname(os.path.abspath(__file__)) + "/static/"
     app.run()

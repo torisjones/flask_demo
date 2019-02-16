@@ -4,13 +4,7 @@ import os
 app = Flask(__name__)
 
 
-# CSS
-@app.route('/static/css/bootstrap.min.css', methods=["GET"])
-def server_css():
-    return send_from_directory(app.config['STATIC_CONTENT_DIRECTORY'], "bootstrap.min.css")
-
-
-@app.route('/home', methods=["GET"])
+@app.route('/', methods=["GET"])
 def serve_home_page():
     return send_from_directory(app.config['STATIC_CONTENT_DIRECTORY'], "index.html")
 
