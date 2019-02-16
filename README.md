@@ -160,7 +160,18 @@ to create the json response with the schema:
 {
   "code": 201,
   "message": "Customer created",
-  "objectCreated": CustomerObjectJson
+  "objectCreated": {
+        "_id": "string",
+        "address": {
+            "city": "string",
+            "state": "string",
+            "street_name": "string",
+            "street_number": "string",
+            "zip": "string"
+        },
+        "first_name": "string",
+        "last_name": "string"
+    }
 }
 ```
 
