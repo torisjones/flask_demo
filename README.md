@@ -217,7 +217,7 @@ def get_accounts_by_customer(customer_id):
         return jsonify({"code": 404, "message": "This id does not exist in customers"}), 404
     return jsonify([ACCOUNTS[account_id].to_json() for account_id in CUSTOMERS[customer_id].accounts])
 ```
-Add this function under the comment `Route 6.`
+Add this function under the comment `Route 5.`
 
 ##### Route 6: Creating an Account: POST
 The purpose of this route is to create entries in the account database. To create an entry, we will need to validate the incoming request json to ensure it contains all the data needed for the entry, and return a 201 status code saying that the entry has been added to the database. 
@@ -250,6 +250,7 @@ def add_account(customer_id):
 
     return jsonify({"code": 201, "message": "Account created", "objectCreated": new_account.to_json()})
 ```
+Add this function under the comment `Route 6.`
 
 ##### Route 8: Deleting an Account: DELETE
 The purpose of this route is to delete entries in the account database. To delete an entry, we will need to validate the incoming request to ensure the path contains a valid account_id parameter, and return a 204 status code (No Content). 
@@ -266,7 +267,7 @@ def remove_account(account_id):
     del ACCOUNTS[account_id]
     return ('', 204)
 ```
-
+Add this function under the comment `Route 8.`
 
 
 ### Basic Front End
