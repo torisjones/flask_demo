@@ -172,8 +172,11 @@ def add_customer():
     new_customer = Customer(**request.json)         # Creates Customer object
     new_customer.validate()                         # Validates Data
     CUSTOMERS[new_customer.get_id()] = new_customer # Adds Customer object to database
-    return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()}) # Response returned to client
+    return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()}), 201 # Response returned to client
 ```
+Add this function under the comment `Route 1.`
+
+
 
 ##### Route 2: Getting all Customers: GET 
 The second method that we will create is to get all customers in the CUSTOMERS database from the `/customers` route. The method will need to a return
@@ -195,6 +198,83 @@ Add this function under the comment `Route 2.`
 When we are retrieving customer information, it would be inefficient to get all customers every time we wanted to only access the 
 information of one customer. To solve this problem, we will create a method that only gets the customer specified by the ID
 passed in the request. 
+
+In flask, we can define URL variables with the `<varName>` format and pass the variable name via the function's arguments. 
+Example:
+```python
+@app.route("/home/<user>", methods=["GET"])
+def get_user(user):
+    return "You got user {user}".format(user=user)
+```
+Here, we have the variable user in the URL and have a function argument where the variable is passed. 
+
+When using customer Ids, we will follow a similar format. The path of the request should contain `customers` at the root
+then the customer id as the path variable (`/customers/<customer_id>`).
+
+First, we need to confirm that the customer exists in the database. We can check that an entry exists with the `if <key> in <dict>`
+syntax. For us, the line will look like `if if customer_id not in CUSTOMERS` as we are seeing if the entry doesn't exist. 
+If the customer id doesn't exist, then we will return a 404 error code. The schema of this json response is:
+```json
+{ 
+  "code": 404, 
+  "message": "This id does not exist in customers",
+}
+```
+With flask, we can return the HTTP status as the second variable in an array. Python makes this easy by allowing us to use the 
+`return var1, var2` syntax where the first var is the json string and the second is our http code as an integer.
+
+If the customer exists in the database, then we can go ahead and return the json of the Customer object by calling the `.to_json()` method 
+of the Customer object and converting it into a string. If no response code is contained the return, flask implicitly assumes a 200 code.
+
+Putting it all together, the function looks like this:
+```python
+
+@app.route("/customers/<customer_id>", methods=["GET"])   # Contains Path variable
+def get_customer_by_id(customer_id):                      # Path variable as argument
+    if customer_id not in CUSTOMERS:                      # Check to see if id exists in database 
+        return jsonify({"code": 404, "message": "This id does not exist in customers"}), 404    # Return 404 if not found
+    return jsonify(CUSTOMERS[customer_id].to_json())      # Return the string form of the dictionary (json) object
+```
+
+Add this function under the comment `Route 3.`
+
+
+##### Route 4: Modifying existing Customer: PUT
+The last feature of the Customer API is allowing a client to modify an existing entry. Instead of deleting and recreating 
+a customer every time data changes, we can modify the object in place. This method is a combination of both the get and create 
+user functions.
+
+Using the same path from route 4, we change the method to a `PUT`. 
+
+The initial part of the function starts out the same as the GET endpoint, verifying that a customer is in the database before proceeding with 
+modifying the object.
+
+Once we have confirmed it exists, we want to modify the object. However, we do not want to modify the actual object before we
+confirm that the data entered is valid. To achieve this, we will 
+1. Clone the Customer object
+2. Update the data 
+3. Validate that the data is still valid and if it is, save it back to the same key in the database
+4. Return a 202 code
+
+Using the `copy()` function, we can create a copy of the Customer object. Then we will call the `.update(new_json)` method in the 
+Customer object to update the relevant fields. The `.validate()` method will then validate that the Customer has valid data and finally, 
+we will save it back to dictionary with the same Customer Id. 
+
+Putting it all together, the function looks like this:
+```python
+@app.route("/customers/<customer_id>", methods=["PUT"])           # Contains Path variable
+def put_customer_by_id(customer_id):                              # Path variable as argument
+    if customer_id not in CUSTOMERS:                              # Check to see if id exists in database 
+        return jsonify({"code": 404, "message": "This id does not exist in customers"}), 404   # Return 404 if not found
+    customer = copy(CUSTOMERS[customer_id])                       # Generate a copy of the Customer Object
+    customer.update(new_values=request.json)                      # Update the object
+    customer.validate()                                           # Validate that is still valid
+    CUSTOMERS[customer_id] = customer                             # Save it if it is Valid
+    return jsonify({"code": 202, "message": "Accepted customer update"}), 202  # Return a 202
+```
+
+Add this function under the comment `Route 4.`
+
 
 
 ### Basic Front End
