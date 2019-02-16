@@ -288,6 +288,79 @@ Add this function under the comment `Route 4.`
 
 
 
+
+##### Route 5: Getting all Accounts that belong to a Customer: GET 
+We will be getting all accounts that belong to a specified customer ACCOUNTS database from the `/customers/<customer_id>/accounts` route. The method will need to a return
+ a list of `Account` objects. Luckily, python makes it easy to list all objects from a dictionary with the `.values()` method. 
+ 
+This route is markedly similar to route 2, except that we must filter down the account objects by customer_id. 
+ 
+We will need to iterate through this list of values and convert the account objects to dictionaries. Once they data objects are
+in the dictionary format, flask can easily convert this into a json response. We will also need to wrap this function in a decorator
+with the appropriate route and method type. To convert the list of dictionaries into a json, we can use flask's jsonify function.
+
+
+Using python's built in list comprehension, we can make this task into a one line function:
+```python
+@app.route("/customers/<customer_id>/accounts", methods=["GET"])
+def get_accounts_by_customer(customer_id):
+    if customer_id not in CUSTOMERS:
+        return jsonify({"code": 404, "message": "This id does not exist in customers"}), 404
+    return jsonify([ACCOUNTS[account_id].to_json() for account_id in CUSTOMERS[customer_id].accounts])
+```
+Add this function under the comment `Route 5.`
+
+##### Route 6: Creating an Account: POST
+The purpose of this route is to create entries in the account database. To create an entry, we will need to validate the incoming request json to ensure it contains all the data needed for the entry, and return a 201 status code saying that the entry has been added to the database. 
+
+Let's start out by building the function. First we need to ensure that the customer_id is a valid id that belongs to an existing customer. If the customer_id is not associated with customer, we should return a `404` denoting that the customer was not found. The second thing we will need to do is create a new Account object with all 
+of the data of the incoming request object. Python has a feature called `**kwargs` that allows us to pass a dictionary in 
+as function arguments. To access the body (json -> dictionary) included in the request, flask has a method `request.json` 
+that generates the dictionary object. This can then be passed into the Customer object with `Account(**request.json)`. 
+
+Next, we want to call the `validate()` function on the Customer class. This will compare the data loaded into the class with the predefined schema. 
+If there is a mismatch between datatypes, it will throw a `DataFormatMisMatch` exception. This exception will be caught by the
+exception handler function and then a 400 response will be sent to the client. 
+
+Then we will need to add the account to the database. In our case, we are using a dictionary with the key as the customer id 
+and the value as the Customer object. 
+
+Finally, we need to add the new account to the corresponding customer in the customer database, utilizing the customer_id and account_id.
+
+```python
+@app.route("/customers/<customer_id>/accounts", methods=["POST"])
+def add_account(customer_id):
+    if customer_id not in CUSTOMERS:
+        return (jsonify({"code": 404, "message": "Customer does not exist"}), 404)
+
+    new_account = Account(**request.json)
+    new_account.customer_id = customer_id
+    new_account.validate()
+    ACCOUNTS[new_account.get_id()] = new_account
+    CUSTOMERS[new_account.customer_id].add_account(new_account.get_id())
+
+    return jsonify({"code": 201, "message": "Account created", "objectCreated": new_account.to_json()})
+```
+Add this function under the comment `Route 6.`
+
+##### Route 8: Deleting an Account: DELETE
+The purpose of this route is to delete entries in the account database. To delete an entry, we will need to validate the incoming request to ensure the path contains a valid account_id parameter, and return a 204 status code (No Content). 
+
+Let's start out by building the function. First we need to ensure that the account_id is a valid id that belongs to an existing account. If the account_id is not associated with an account, we should return a `404` denoting that the account was not found. The second thing we will need to do is remove the account from the corresponding customer object in the CUSTOMER database. Finally, we will delete the account from the ACCOUNTS database.
+
+```python
+@app.route("/accounts/<account_id>", methods=["DELETE"])
+def remove_account(account_id):
+    if account_id not in ACCOUNTS:
+        return jsonify({"code": 404, "message": "This id does not exist in accounts"}), 404
+    customer_id = ACCOUNTS[account_id].customer_id
+    CUSTOMERS[customer_id].remove_account(account_id)
+    del ACCOUNTS[account_id]
+    return ('', 204)
+```
+Add this function under the comment `Route 8.`
+
+
 ### Basic Front End
 A basic front end is also included with this example that hits the endpoints defined in the banking tutorial. 
 
