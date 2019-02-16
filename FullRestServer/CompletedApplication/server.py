@@ -195,7 +195,7 @@ def add_customer():
     new_customer = Customer(**request.json)
     new_customer.validate()
     CUSTOMERS[new_customer.get_id()] = new_customer
-    return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()})
+    return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()}), 201
 
 
 # Route 2: GET all Customers from the /customers endpoint
@@ -205,23 +205,23 @@ def get_customers():
 
 
 # Route 3: GET Customer by customer ID from the /customers/<id> endpoint
-@app.route("/customers/<id>", methods=["GET"])
-def get_customer_by_id(id):
-    if id not in CUSTOMERS:
+@app.route("/customers/<customer_id>", methods=["GET"])
+def get_customer_by_id(customer_id):
+    if customer_id not in CUSTOMERS:
         return jsonify({"code": 404, "message": "This id does not exist in customers"}), 404
-    return jsonify(CUSTOMERS[id].to_json())
+    return jsonify(CUSTOMERS[customer_id].to_json())
 
 
 # Route 4: PUT Customer by customer ID from the /customers/<id> endpoint
-@app.route("/customers/<id>", methods=["PUT"])
-def put_customer_by_id(id):
-    if id not in CUSTOMERS:
+@app.route("/customers/<customer_id>", methods=["PUT"])
+def put_customer_by_id(customer_id):
+    if customer_id not in CUSTOMERS:
         return jsonify({"code": 404, "message": "This id does not exist in customers"}), 404
-    customer = copy(CUSTOMERS[id])
+    customer = copy(CUSTOMERS[customer_id])
     customer.update(new_values=request.json)
     customer.validate()
-    CUSTOMERS[id] = customer
-    return jsonify({"code": 202, "message": "Accepted customer update"})
+    CUSTOMERS[customer_id] = customer
+    return jsonify({"code": 202, "message": "Accepted customer update"}), 202
 
 
 # Route 5: GET Accounts belonging to customer from the /customers/<customer_id>/accounts endpoint
@@ -244,7 +244,7 @@ def add_account(customer_id):
     ACCOUNTS[new_account.get_id()] = new_account
     CUSTOMERS[new_account.customer_id].add_account(new_account.get_id())
 
-    return jsonify({"code": 201, "message": "Account created", "objectCreated": new_account.to_json()})
+    return jsonify({"code": 201, "message": "Account created", "objectCreated": new_account.to_json()}), 201
 
 
 # Route 7: PUT Account by account id to the /accounts/<account_id> endpoint
@@ -257,7 +257,7 @@ def put_account(account_id):
     account.update(new_values=request.json)
     account.validate()
     ACCOUNTS[account_id] = account
-    return jsonify({"code": 202, "message": "Accepted account update"})
+    return jsonify({"code": 202, "message": "Accepted account update"}), 202
 
 
 # Route 8: DELETE Account by account id to the /accounts/<account_id> endpoint
