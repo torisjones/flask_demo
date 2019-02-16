@@ -143,14 +143,36 @@ an internal customer ID, validate the incoming request json to ensure it contain
 return a 201 status code saying that the entry has been added to the database. 
 
 Let's start out by building the function. The first thing we will need to do is create a new Customer object with all 
-of the data of the incoming request object. Python has a feature called 
+of the data of the incoming request object. Python has a feature called `**kwargs` that allows us to pass a dictionary in 
+as function arguments. To access the body (json -> dictionary) included in the request, flask has a method `request.json` 
+that generates the dictionary object. This can then be passed into the Customer object with `Customer(**request.json)`. 
 
+Next, we want to call the `validate()` function on the Customer class. This will compare the data loaded into the class with the predefined schema. 
+If there is a mismatch between datatypes, it will throw a `DataFormatMisMatch` exception. This exception will be caught by the
+exception handler function and then a 400 response will be sent to the client. 
+
+Then we will need to add the customer to the database. In our case, we are using a dictionary with the key as the customer id 
+and the value as the Customer object. 
+
+Finally, we construct the response to the client following the model defined in the Nessie API standards. Use the jsonify method
+to create the json response with the schema:
+```json
+{
+  "code": 201,
+  "message": "Customer created",
+  "objectCreated": CustomerObjectJson
+}
+```
+
+
+Putting it all together:
 ```python
+@app.route("/customers", methods=["POST"])
 def add_customer():
-    new_customer = Customer(**request.json)
-    new_customer.validate()
-    CUSTOMERS[new_customer.get_id()] = new_customer
-    return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()})
+    new_customer = Customer(**request.json)         # Creates Customer object
+    new_customer.validate()                         # Validates Data
+    CUSTOMERS[new_customer.get_id()] = new_customer # Adds Customer object to database
+    return jsonify({"code": 201, "message": "Customer created", "objectCreated": new_customer.to_json()}) # Response returned to client
 ```
 
 ##### Route 2: Getting all Customers: GET 

@@ -125,7 +125,9 @@ class Customer(JsonRequest):
         }
     }
 
-    def __init__(self, first_name, last_name, address):
+    def __init__(self, first_name=None, last_name=None, address=None):
+        if address is None:
+            address = dict()
         self._id = hashlib.md5(str(uuid.uuid4()).encode()).digest().hex()
         self.first_name = first_name
         self.last_name = last_name
@@ -162,7 +164,7 @@ class Account(JsonRequest):
         "customer_id": str
     }
 
-    def __init__(self, type, account_number=None, customer_id=None, nickname=None, rewards=0, balance=0):
+    def __init__(self, type=None, account_number=None, customer_id=None, nickname=None, rewards=0, balance=0):
         self.type = type
         self.account_number = ''.join(["{0}".format(randint(0, 9)) for num in range(0, 16)]) if account_number is None else account_number
         self.customer_id = customer_id
