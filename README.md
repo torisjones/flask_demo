@@ -197,6 +197,24 @@ information of one customer. To solve this problem, we will create a method that
 passed in the request. 
 
 
+
+##### Route 5: Getting all Accounts that belong to a Customer: GET 
+We will be getting all accounts that belong to a specified customer ACCOUNTS database from the `/customers/<customer_id>/accounts` route. The method will need to a return
+ a list of `Account` objects. Luckily, python makes it easy to list all objects from a dictionary with the `.values()` method. 
+ 
+We will need to iterate through this list of values and convert the account objects to dictionaries. Once they data objects are
+in the dictionary format, flask can easily convert this into a json response. We will also need to wrap this function in a decorator
+with the appropriate route and method type. To convert the list of dictionaries into a json, we can use flask's jsonify function.
+
+Using python's built in list comprehension, we can make this task into a one line function:
+```python
+@app.route("/customers/<customer_id>/accounts", methods=["GET"])
+def get_accounts_by_():
+    return jsonify([cust.to_json() for cust in CUSTOMERS.values()])
+```
+Add this function under the comment `Route 2.`
+
+
 ### Basic Front End
 A basic front end is also included with this example that hits the endpoints defined in the banking tutorial. 
 
