@@ -212,7 +212,7 @@ When using customer Ids, we will follow a similar format. The path of the reques
 then the customer id as the path variable (`/customers/<customer_id>`).
 
 First, we need to confirm that the customer exists in the database. We can check that an entry exists with the `if <key> in <dict>`
-syntax. For us, the line will look like `if if customer_id not in CUSTOMERS` as we are seeing if the entry doesn't exist. 
+syntax. For us, the line will look like `if customer_id not in CUSTOMERS` as we are seeing if the entry doesn't exist. 
 If the customer id doesn't exist, then we will return a 404 error code. The schema of this json response is:
 ```json
 { 
