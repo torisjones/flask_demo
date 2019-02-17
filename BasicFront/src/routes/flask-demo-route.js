@@ -11,6 +11,8 @@ class FlaskDemoRoute extends HTMLElement {
     // /utils/nessie-api
     this.api = new NessieApi();
   }
+  // Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources
+  // or rendering. Generally, you should try to delay work until this time.
   connectedCallback() {
     this._shadowRoot.innerHTML = tempHtml;
 
@@ -22,9 +24,13 @@ class FlaskDemoRoute extends HTMLElement {
     // Gets the customers from flask and displays the results
     this.__getCustomers();
   }
+  // Called every time the element is removed from the DOM. Useful for running clean up code.
   disconnectedCallback() {
 
   }
+  // Called when an observed attribute has been added, removed, updated, or replaced. Also called for initial values
+  // when an element is created by the parser, or upgraded. Note: only attributes listed in the observedAttributes
+  // property will receive this callback.
   attributeChangedCallback() {
 
   }

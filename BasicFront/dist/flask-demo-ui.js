@@ -120,6 +120,8 @@ class FlaskDemoRoute extends HTMLElement {
     // /utils/nessie-api
     this.api = new NessieApi();
   }
+  // Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources
+  // or rendering. Generally, you should try to delay work until this time.
   connectedCallback() {
     this._shadowRoot.innerHTML = `<style>button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}#pageDiv{font-family:sans-serif}h1{font-family:sans-serif}.error{color:darkred}
 </style><h1>Nessie Flask!</h1><div class="error"></div><div id="pageDiv"></div>`;
@@ -132,9 +134,13 @@ class FlaskDemoRoute extends HTMLElement {
     // Gets the customers from flask and displays the results
     this.__getCustomers();
   }
+  // Called every time the element is removed from the DOM. Useful for running clean up code.
   disconnectedCallback() {
 
   }
+  // Called when an observed attribute has been added, removed, updated, or replaced. Also called for initial values
+  // when an element is created by the parser, or upgraded. Note: only attributes listed in the observedAttributes
+  // property will receive this callback.
   attributeChangedCallback() {
 
   }
@@ -326,7 +332,10 @@ if(!customElements.get('flask-demo-route')) {
 
 class CreateCustomer extends HTMLElement {
   constructor(){
+    // If you define a constructor, always call super() first!
+    // This is specific to CE and required by the spec.
     super();
+    // This just gives you access to the shadowRoot for <create-customer></create-customer>
     this._shadowRoot = this.attachShadow({mode: 'open'});
     this.newCustomer = {
       first_name: '',
@@ -343,6 +352,8 @@ class CreateCustomer extends HTMLElement {
   connectedCallback(){
     this._shadowRoot.innerHTML = `<style>.label{width:200px;padding-top:10px}button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}input{padding:5px;width:200px}
 </style><h3>Customer DetailsPage!</h3><div class="label">First Name:</div><input id="firstName"/><br><div class="label">Last Name:</div><input id="lastName"/><br><div class="label">Street Number:</div><input id="streetNumber"/><br><div class="label">Street Name:</div><input id="streetName"/><br><div class="label">City:</div><input id="city"/><br><div class="label">State:</div><input id="state"/><br><div class="label">Zip:</div><input id="zip"/><br><div class="horizontal-div"><button id="back" class="neutral-button">Home</button><button id="create" class="create">Save</button></div>`;
+    // Once the page builds, we initialize the html elements in create-customer.html so that we can readily manipulate
+    // their attributes/properties
     this.firstName = this._shadowRoot.querySelector('#firstName');
     this.lastName = this._shadowRoot.querySelector('#lastName');
     this.streetNumber = this._shadowRoot.querySelector('#streetNumber');
@@ -352,6 +363,9 @@ class CreateCustomer extends HTMLElement {
     this.zip = this._shadowRoot.querySelector('#zip');
     this.backButton = this._shadowRoot.querySelector('#back');
     this.createButton = this._shadowRoot.querySelector('#create');
+    // Since these elements are editable fields, typically you create a method called addEventListeners where you then
+    // attach all respective listeners. So now CreateCustomer is the parent element and it will be listening for
+    // change/click events for the inputs/buttons that are it's child elements
     this.__addEventListeners();
   }
   disconnectedCallback(){
@@ -371,9 +385,29 @@ class CreateCustomer extends HTMLElement {
     this.city.addEventListener('change',this.updateCustomer.bind(this));
     this.state.addEventListener('change',this.updateCustomer.bind(this));
     this.zip.addEventListener('change',this.updateCustomer.bind(this));
-    this.backButton.addEventListener('click',this.back.bind(this));
+    this.backButton.addEventListener('click',this.__emitBackEvent.bind(this));
     this.createButton.addEventListener('click',this.__emitUpdateEvent.bind(this));
   }
+  // getters and setters:
+  // This is how you get/set the properties for the web component. So when we did
+  /*
+      this.pageDiv.querySelector('create-customer').data = customer;
+   */
+  // in flask-demo-route.js, that data is set in the set data(_value) below and then accessed in the get data()
+  // If you wanted to reflect the property to the attribute you would do something like this
+  /*
+      get data() {
+        return this.getAttribute('data');
+      }
+
+      set data(_value) {
+        this.setAttribute('data', _value);
+      }
+   */
+  // Some properties reflect their values as attributes, meaning that if the property is changed using JavaScript, the
+  // corresponding attribute is also changed at the same time to reflect the new value. This is useful for accessibility
+  // and to allow CSS selectors to work as intended. If you are passing a JSON object, typically, you would not reflect
+  // the property
   get data() {
     return this._data;
   }
@@ -384,8 +418,22 @@ class CreateCustomer extends HTMLElement {
       this.loadData();
     }
   }
+  // Sets all the customer attributes to their corresponding inputs on the page
+  loadData(){
+    this.firstName.value = this.data.first_name;
+    this.lastName.value = this.data.last_name;
+    this.streetNumber.value = this.data.address.street_number;
+    this.streetName.value = this.data.address.street_name;
+    this.city.value = this.data.address.city;
+    this.state.value = this.data.address.state;
+    this.zip.value = this.data.address.zip;
+  }
+  // Updates this.newCustomer with the value of the input that changed
   updateCustomer(event){
     if(this.newCustomer){
+      // event.currentTarget is very useful when interacting with a button, input, etc. CurrentTarget contains the HTML
+      // element that triggered the event. So then you can access it's properties/attributes, which in this case, we
+      // built a switch statement based on the attribute 'id' so we knew which field in this.newCustomer to update
       switch(event.currentTarget.getAttribute('id')){
         case 'firstName':
           this.newCustomer.first_name = event.currentTarget.value;
@@ -410,19 +458,12 @@ class CreateCustomer extends HTMLElement {
       }
     }
   }
-  loadData(){
-    this.firstName.value = this.data.first_name;
-    this.lastName.value = this.data.last_name;
-    this.streetNumber.value = this.data.address.street_number;
-    this.streetName.value = this.data.address.street_name;
-    this.city.value = this.data.address.city;
-    this.state.value = this.data.address.state;
-    this.zip.value = this.data.address.zip;
-  }
-  back(){
+  __emitBackEvent(){
+    // Dispatch a 'back' event to the parent element (FlaskDemoRoute)
     this.dispatchEvent(new CustomEvent('back'));
   }
   __emitUpdateEvent(){
+    // Similar to above, but we are instantiating a dictionary of data we want the parent element to be able to access
     this.dispatchEvent(new CustomEvent('create-customer',{detail:this.newCustomer}));
   }
 }
