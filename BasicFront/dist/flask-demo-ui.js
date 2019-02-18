@@ -217,6 +217,7 @@ class FlaskDemoRoute extends HTMLElement {
         }).catch((error) => {
           console.log(error);
           this.errorDiv.innerHTML = JSON.stringify(error);
+          this.__getAccounts(custId);
         });
         break;
       case 'create':
@@ -363,7 +364,7 @@ class CreateCustomer extends HTMLElement {
     this.zip = this._shadowRoot.querySelector('#zip');
     this.backButton = this._shadowRoot.querySelector('#back');
     this.createButton = this._shadowRoot.querySelector('#create');
-    // Since these elements are editable fields, typically you create a method called addEventListeners where you then
+    // Since these elements are interactive fields, typically you create a method called addEventListeners where you then
     // attach all respective listeners. So now CreateCustomer is the parent element and it will be listening for
     // change/click events for the inputs/buttons that are it's child elements
     this.__addEventListeners();
@@ -388,7 +389,9 @@ class CreateCustomer extends HTMLElement {
     this.backButton.addEventListener('click',this.__emitBackEvent.bind(this));
     this.createButton.addEventListener('click',this.__emitUpdateEvent.bind(this));
   }
-  // getters and setters:
+  //--------------------------------------------------------------------------------------------------------------------
+  // Getters and Setters -----------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // This is how you get/set the properties for the web component. So when we did
   /*
       this.pageDiv.querySelector('create-customer').data = customer;
@@ -418,6 +421,9 @@ class CreateCustomer extends HTMLElement {
       this.loadData();
     }
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Manage Data -------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // Sets all the customer attributes to their corresponding inputs on the page
   loadData(){
     this.firstName.value = this.data.first_name;
@@ -458,12 +464,16 @@ class CreateCustomer extends HTMLElement {
       }
     }
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Dispatch Events ---------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   __emitBackEvent(){
-    // Dispatch a 'back' event to the parent element (FlaskDemoRoute)
+    // Dispatch a 'back' event to the parent element (FlaskDemoRoute), will return to the manage-customers page
     this.dispatchEvent(new CustomEvent('back'));
   }
   __emitUpdateEvent(){
-    // Similar to above, but we are instantiating a dictionary of data we want the parent element to be able to access
+    // Similar to above, but we are instantiating a dictionary of data we want the parent element to be able to access.
+    // Will post/put customer and return to the manage-customers page
     this.dispatchEvent(new CustomEvent('create-customer',{detail:this.newCustomer}));
   }
 }
@@ -524,6 +534,9 @@ class ManageCustomers extends HTMLElement {
       button.addEventListener('click',this.__customerAccounts.bind(this));
     });
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Dispatch Events ---------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   back(){
     this.dispatchEvent(new CustomEvent('back'));
   }
@@ -548,12 +561,17 @@ if(!customElements.get('manage-customers')){
 
 class CustomerAccountsPage extends HTMLElement {
   constructor(){
+    // If you define a constructor, always call super() first!
+    // This is specific to CE and required by the spec.
     super();
+    // This just gives you access to the shadowRoot for <customer-accounts-page></customer-accounts-page>
     this._shadowRoot = this.attachShadow({mode: 'open'});
   }
   connectedCallback(){
     this._shadowRoot.innerHTML = `<style>.horizontal-div{display:flex}.label{padding-right:20px;width:70px}.hidden{display:none}button{padding:10px;margin:10px;border-radius:5px;width:150px}.create{background-color:seagreen;color:white}.manage{background-color:midnightblue;color:white}.regressive{background-color:darkred;color:white}.neutral-button{background-color:dimgrey;color:white}.container{margin-bottom:20px;border:solid;width:350px;padding-top:10px}.account{padding-left:20px;width:350px}
 </style><h3>Customer Accounts!</h3><div id="manageAccounts"><button id="createAccount" class="create">Create Account</button><div id="accounts"></div><div class="horizontal-div"><button id="customers" class="manage">Manage Customers</button></div></div><div id="createAccountDiv" class="hidden"><div class="horizontal-div"><div class="label">Nickname:</div><div class='name'><input id="nickname"/></div></div><div class="horizontal-div"><div class="label">Type:</div><div class="type"><input id="type"/></div></div><div class="horizontal-div"><div class="label">Rewards:</div><div class="rewards"><input id="rewards"/></div></div><div class="horizontal-div"><div class="label">Balance:</div><div class="balance"><input id="balance"/></div></div><button class="backAccountButton manage">Back to Accounts</button><button class="create-button create">Create Account</button></div>`;
+    // Once the page builds, we initialize the html elements in customer-accounts-page.html so that we can readily
+    // manipulate their attributes/properties
     this.accountsDiv = this._shadowRoot.querySelector('#accounts');
     this.customerButton = this._shadowRoot.querySelector('#customers');
     this.createAccountDiv = this._shadowRoot.querySelector('#createAccountDiv');
@@ -561,6 +579,8 @@ class CustomerAccountsPage extends HTMLElement {
     this.manageAccountsDiv = this._shadowRoot.querySelector('#manageAccounts');
     this.createButton = this._shadowRoot.querySelector('.create-button');
     this.backAccountButton = this._shadowRoot.querySelector('.backAccountButton');
+    // Since these elements are interactive, typically you create a method called addEventListeners where you then
+    // attach all the respective listeners.
     this.__addEventListeners();
   }
   disconnectedCallback(){
@@ -574,10 +594,14 @@ class CustomerAccountsPage extends HTMLElement {
   }
   __addEventListeners(){
     this.backAccountButton.addEventListener('click',this.__viewManageAccounts.bind(this));
-    this.customerButton.addEventListener('click',this.manageCustomers.bind(this));
+    this.customerButton.addEventListener('click',this.__emitManageCustomers.bind(this));
     this.createAccountButton.addEventListener('click',this.__viewCreateAccount.bind(this));
     this.createButton.addEventListener('click',this.__createAccount.bind(this));
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Getters and Setters -----------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
+  // More details on the getter/setter section in create-customer.js
   get accounts() {
     return this._accounts;
   }
@@ -593,6 +617,9 @@ class CustomerAccountsPage extends HTMLElement {
   set customerId(_value){
     this._customerId = _value;
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Manage Data -------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   loadData(){
     this.accounts.forEach((account)=>{
       let accountContainer = document.createElement('div');
@@ -633,6 +660,13 @@ class CustomerAccountsPage extends HTMLElement {
     this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'create',custId:this.customerId,body:body}}));
     this.__clearData();
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Manage Div Visibility ---------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
+  // Manage which div you see -- mainly this is here because I was being lazy and didn't create a new page for create
+  // account, so instead I just hid the HTML until you need it. In the scss, you can see that there is a class 'hidden'
+  // defined to have { display: none }, which does what it sounds like, makes the div invisible. These two functions
+  // just swap out which div has the attribute class="hidden"
   __viewCreateAccount(){
     this.manageAccountsDiv.setAttribute('class','hidden');
     this.createAccountDiv.removeAttribute('class');
@@ -642,10 +676,10 @@ class CustomerAccountsPage extends HTMLElement {
     this.manageAccountsDiv.removeAttribute('class');
     this.__clearData();
   }
-  back(){
-    this.dispatchEvent(new CustomEvent('back'));
-  }
-  manageCustomers(){
+  //--------------------------------------------------------------------------------------------------------------------
+  // Dispatch Events ---------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
+  __emitManageCustomers(){
     this.dispatchEvent(new CustomEvent('customers'));
   }
   __emitUpdateEvent(event){

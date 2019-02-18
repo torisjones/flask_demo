@@ -1,10 +1,15 @@
 class CustomerAccountsPage extends HTMLElement {
   constructor(){
+    // If you define a constructor, always call super() first!
+    // This is specific to CE and required by the spec.
     super();
+    // This just gives you access to the shadowRoot for <customer-accounts-page></customer-accounts-page>
     this._shadowRoot = this.attachShadow({mode: 'open'});
   }
   connectedCallback(){
     this._shadowRoot.innerHTML = tempHtml;
+    // Once the page builds, we initialize the html elements in customer-accounts-page.html so that we can readily
+    // manipulate their attributes/properties
     this.accountsDiv = this._shadowRoot.querySelector('#accounts');
     this.customerButton = this._shadowRoot.querySelector('#customers');
     this.createAccountDiv = this._shadowRoot.querySelector('#createAccountDiv');
@@ -12,6 +17,8 @@ class CustomerAccountsPage extends HTMLElement {
     this.manageAccountsDiv = this._shadowRoot.querySelector('#manageAccounts');
     this.createButton = this._shadowRoot.querySelector('.create-button');
     this.backAccountButton = this._shadowRoot.querySelector('.backAccountButton');
+    // Since these elements are interactive, typically you create a method called addEventListeners where you then
+    // attach all the respective listeners.
     this.__addEventListeners();
   }
   disconnectedCallback(){
@@ -25,10 +32,14 @@ class CustomerAccountsPage extends HTMLElement {
   }
   __addEventListeners(){
     this.backAccountButton.addEventListener('click',this.__viewManageAccounts.bind(this))
-    this.customerButton.addEventListener('click',this.manageCustomers.bind(this));
+    this.customerButton.addEventListener('click',this.__emitManageCustomers.bind(this));
     this.createAccountButton.addEventListener('click',this.__viewCreateAccount.bind(this));
     this.createButton.addEventListener('click',this.__createAccount.bind(this));
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Getters and Setters -----------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
+  // More details on the getter/setter section in create-customer.js
   get accounts() {
     return this._accounts;
   }
@@ -44,6 +55,9 @@ class CustomerAccountsPage extends HTMLElement {
   set customerId(_value){
     this._customerId = _value;
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Manage Data -------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   loadData(){
     this.accounts.forEach((account)=>{
       let accountContainer = document.createElement('div');
@@ -84,6 +98,13 @@ class CustomerAccountsPage extends HTMLElement {
     this.dispatchEvent(new CustomEvent('update-account',{detail:{type:'create',custId:this.customerId,body:body}}));
     this.__clearData();
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Manage Div Visibility ---------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
+  // Manage which div you see -- mainly this is here because I was being lazy and didn't create a new page for create
+  // account, so instead I just hid the HTML until you need it. In the scss, you can see that there is a class 'hidden'
+  // defined to have { display: none }, which does what it sounds like, makes the div invisible. These two functions
+  // just swap out which div has the attribute class="hidden"
   __viewCreateAccount(){
     this.manageAccountsDiv.setAttribute('class','hidden');
     this.createAccountDiv.removeAttribute('class');
@@ -93,10 +114,10 @@ class CustomerAccountsPage extends HTMLElement {
     this.manageAccountsDiv.removeAttribute('class');
     this.__clearData();
   }
-  back(){
-    this.dispatchEvent(new CustomEvent('back'));
-  }
-  manageCustomers(){
+  //--------------------------------------------------------------------------------------------------------------------
+  // Dispatch Events ---------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
+  __emitManageCustomers(){
     this.dispatchEvent(new CustomEvent('customers'));
   }
   __emitUpdateEvent(event){

@@ -107,6 +107,7 @@ class FlaskDemoRoute extends HTMLElement {
         }).catch((error) => {
           console.log(error);
           this.errorDiv.innerHTML = JSON.stringify(error);
+          this.__getAccounts(custId);
         });
         break;
       case 'create':

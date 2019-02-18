@@ -30,7 +30,7 @@ class CreateCustomer extends HTMLElement {
     this.zip = this._shadowRoot.querySelector('#zip');
     this.backButton = this._shadowRoot.querySelector('#back');
     this.createButton = this._shadowRoot.querySelector('#create');
-    // Since these elements are editable fields, typically you create a method called addEventListeners where you then
+    // Since these elements are interactive fields, typically you create a method called addEventListeners where you then
     // attach all respective listeners. So now CreateCustomer is the parent element and it will be listening for
     // change/click events for the inputs/buttons that are it's child elements
     this.__addEventListeners();
@@ -55,7 +55,9 @@ class CreateCustomer extends HTMLElement {
     this.backButton.addEventListener('click',this.__emitBackEvent.bind(this));
     this.createButton.addEventListener('click',this.__emitUpdateEvent.bind(this));
   }
-  // getters and setters:
+  //--------------------------------------------------------------------------------------------------------------------
+  // Getters and Setters -----------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // This is how you get/set the properties for the web component. So when we did
   /*
       this.pageDiv.querySelector('create-customer').data = customer;
@@ -85,6 +87,9 @@ class CreateCustomer extends HTMLElement {
       this.loadData();
     }
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Manage Data -------------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   // Sets all the customer attributes to their corresponding inputs on the page
   loadData(){
     this.firstName.value = this.data.first_name;
@@ -125,12 +130,16 @@ class CreateCustomer extends HTMLElement {
       }
     }
   }
+  //--------------------------------------------------------------------------------------------------------------------
+  // Dispatch Events ---------------------------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------------------------------------------
   __emitBackEvent(){
-    // Dispatch a 'back' event to the parent element (FlaskDemoRoute)
+    // Dispatch a 'back' event to the parent element (FlaskDemoRoute), will return to the manage-customers page
     this.dispatchEvent(new CustomEvent('back'));
   }
   __emitUpdateEvent(){
-    // Similar to above, but we are instantiating a dictionary of data we want the parent element to be able to access
+    // Similar to above, but we are instantiating a dictionary of data we want the parent element to be able to access.
+    // Will post/put customer and return to the manage-customers page
     this.dispatchEvent(new CustomEvent('create-customer',{detail:this.newCustomer}));
   }
 }
