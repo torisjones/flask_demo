@@ -3,3 +3,4 @@ venv/*
 __pycache__*
 BasicFront/dist/pages/
 BasicFront/dist/utils/
+sonar.js
